@@ -8,11 +8,11 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="project.jar" size="2195" download="eager" />
+    <jar href="project.jar" size="167919" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="project" >
     <param name="requiredFXVersion" value="8.0+"/>
   </applet-desc>
-  <jfx:javafx-desc  width="800" height="600" main-class="project.Project"  name="project" />
+  <jfx:javafx-desc  width="800" height="600" main-class="project.Client"  name="project" />
   <update check="always"/>
 </jnlp>
