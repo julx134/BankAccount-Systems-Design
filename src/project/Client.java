@@ -8,10 +8,14 @@ package project;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -23,11 +27,14 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -44,33 +51,7 @@ public class Client extends Application {
     private String username,password,role;
     
     
-    public void startPage (Stage primaryStage,String username, String password, String role) {
-        try {
-            if(role.equals("manager")) {
-                user = new Manager(username,password,role);
-                user.login(this,username,password);
-            }
-        }catch(Exception e) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error!");
-            alert.setContentText("Incorrect username and/or password.\n");
-            alert.showAndWait();
-            
-            user = null;
-        }
-           
-        if(user instanceof Manager) {
-            System.out.println("Hooray!!!");
-        } 
-    }
-    
-    public void setUser(Users user) {
-        this.user = user;
-    }
-   
-    
-    @Override
+     @Override
     public void start(Stage loginStage) throws FileNotFoundException { 
         
         //creating nodes
@@ -82,8 +63,7 @@ public class Client extends Application {
         MenuItem customer = new MenuItem("Customer");
         MenuItem manager = new MenuItem("Manager");
         MenuButton menuButton = new MenuButton("You are a...",null,customer,manager);
-        Image image = new Image(new FileInputStream("src\\project\\Images\\bankbackground.jpg"));
-        //Image image = new Image("https://www.vpr.org/sites/vpr/files/styles/x_large/public/201902/piggy-bank-split-istock-HighLaZ.jpg");
+        Image image = new Image(new FileInputStream("src\\project\\Images\\bankbackground.jpg")); 
         BackgroundImage background = new BackgroundImage(image,null,null,BackgroundPosition.CENTER,null);
         
         //setting node properties
@@ -120,9 +100,10 @@ public class Client extends Application {
             menuButton.setText("Customer");
         });
         manager.setOnAction(e -> {
-            role="manager";
+            role = "manager";
             menuButton.setText("Manager");
         });
+        //when the login button is pressed
         loginButton.setOnAction(e -> {
             if (role == null) {
                 Alert alert = new Alert(AlertType.ERROR);
@@ -139,7 +120,7 @@ public class Client extends Application {
                 passwordTF.deleteText(0, passwordTF.getText().length());
                 
                 //passing the variables to the next stage
-                startPage(loginStage,username,password,role);
+                authenticateUser(loginStage,username,password,role);
             }
         });
         
@@ -155,7 +136,126 @@ public class Client extends Application {
         loginStage.show();
         
     }
+    
+   
+    public void managerPage(Stage loginPage) throws FileNotFoundException {
+        //creating stage
+        Stage managerStage = new Stage();
+        
+        //creating nodes
+        Image image = new Image(new FileInputStream("src\\project\\Images\\managerbackground.jpg")); 
+        Image image1 = new Image(new FileInputStream("src\\project\\Images\\person.png"));
+        Image image2 = new Image(new FileInputStream("src\\project\\Images\\personremove.png"));
+        Image image3 = new Image(new FileInputStream("src\\project\\Images\\logout.png"));
+        ImageView imageV1 = new ImageView(image1);
+        ImageView imageV2 = new ImageView(image2);
+        ImageView imageV3 = new ImageView(image3);
+        BackgroundImage background = new BackgroundImage(image,null,null,BackgroundPosition.CENTER,null);
+        Button logoutButton = new Button("Logout",imageV3);
+        Button addCustomerButton = new Button("Add Customer",imageV1);
+        Button deleteCustomerButton = new Button("Delete Customer",imageV2);
+        ToolBar toolBar = new ToolBar(); 
+        
+        
+        //setting node properties
+        toolBar.getItems().add(logoutButton);
+        toolBar.setStyle("-fx-background-color:#0E67CC");
+        toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        logoutButton.setStyle("-fx-font-size:15px");
+        logoutButton.setMinHeight(20);
+        logoutButton.setMinWidth(40);
+        imageV3.setFitHeight(15);
+        imageV3.setFitWidth(15);
+        addCustomerButton.setMinSize(230, 80);
+        addCustomerButton.setStyle("-fx-font-size:30px");
+        imageV1.setFitHeight(70);
+        imageV1.setFitWidth(70);
+        deleteCustomerButton.setMinSize(200, 80);
+        deleteCustomerButton.setStyle("-fx-font-size:26px");
+        imageV2.setFitHeight(70);
+        imageV2.setFitWidth(70);
+        
+       
+        //creating layout
+        VBox root = new VBox();
+        
+        //setting layout properties
+        root.getChildren().addAll(toolBar,addCustomerButton,deleteCustomerButton);
+        root.setSpacing(100);
+        root.setAlignment(Pos.BASELINE_CENTER);
+        root.setBackground(new Background(background));
 
+        //creating action event handlers
+        logoutButton.setOnAction(e-> {
+            try {
+                start(loginPage);
+                managerStage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        
+        
+        //creating scene
+        Scene scene = new Scene(root);
+        
+        //setting stage properties  
+        managerStage.setTitle("Bank Account");
+        managerStage.setWidth(1024);
+        managerStage.setHeight(683);
+        managerStage.setScene(scene);
+        managerStage.setResizable(false);
+        managerStage.show();
+        
+    }
+    
+    public void addCustomerPage() {
+        
+    }
+    
+    public void deleteCustomerPage() {
+        
+    }
+
+    //authenticates the user credentials calls the appropriate page
+    public void authenticateUser (Stage loginPage,String username, String password, String role)  {
+        
+        //try-catch clause where the state change is handled by the login method of the concrete class
+        try {
+            if(role.equals("manager")) {
+                user = new Manager(username,password,role);
+                user.login(this,username,password);
+            }
+        }catch(Exception e) {   //concrete class will throw an exception when credentials are incorrect
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error!");
+            alert.setContentText("Incorrect username and/or password.\n");
+            alert.showAndWait();
+            
+            user = null;
+        }
+           
+        if(user instanceof Manager) {
+            //close stage
+            loginPage.close();
+            
+            //move to next stage
+            try {
+                managerPage(loginPage);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } 
+    }
+    
+    //set the user object type
+    public void setUser(Users user) {
+        this.user = user;
+    }
+   
+    
     public static void main(String[] args) {
         launch(args);
         

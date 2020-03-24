@@ -18,22 +18,23 @@ import java.util.logging.Logger;
 public class Manager extends Users{
     private static Manager instance;
 
+    
     public Manager(String username, String password, String role) {
         super(username, password, role);
     }
     
+    //singleton pattern
     public static Manager getInstance() {
         if (instance == null)
             instance = new Manager("admin","admin","manager");
         return instance;
     }
 
-       
+    
     @Override
     public void login(Client c, String username, String password) throws Exception{
         boolean usernameCheck = false, passwordCheck = false;
-        
-        
+         
         try {
             
             File credentials = new File("src\\project\\ManagerInformation\\admin.txt");
@@ -55,8 +56,7 @@ public class Manager extends Users{
             c.setUser(getInstance());
         }else {
             throw new Exception();
-        }
-        
+        }   
     }
     
     @Override
