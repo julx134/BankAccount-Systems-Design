@@ -8,6 +8,7 @@ package project;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -47,6 +48,7 @@ import javafx.stage.Stage;
  */
 public class Client extends Application {
     //rep variables
+    private ArrayList<Users> customers = new ArrayList<Users>();
     private Users user;
     private String username,password,role;
     
@@ -109,7 +111,7 @@ public class Client extends Application {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Error!");
-                alert.setContentText("There seems to be an error with the way you logged in.\n");
+                alert.setContentText("There is an error with the way you logged in.\n");
                 alert.showAndWait();
                 usernameTF.deleteText(0, usernameTF.getText().length());
                 passwordTF.deleteText(0, passwordTF.getText().length());
@@ -119,8 +121,8 @@ public class Client extends Application {
                 password = passwordTF.getText();
                 passwordTF.deleteText(0, passwordTF.getText().length());
                 
-                //passing the variables to the next stage
-                authenticateUser(loginStage,username,password,role);
+                //passes the request to concrete state class
+                requestLogin(loginStage,username,password,role);
             }
         });
         
@@ -136,8 +138,7 @@ public class Client extends Application {
         loginStage.show();
         
     }
-    
-   
+      
     public void managerPage(Stage loginPage) throws FileNotFoundException {
         //creating stage
         Stage managerStage = new Stage();
@@ -186,16 +187,25 @@ public class Client extends Application {
         root.setBackground(new Background(background));
 
         //creating action event handlers
-        logoutButton.setOnAction(e-> {
+        logoutButton.setOnAction(e -> {
+            requestLogout(loginPage,managerStage);
+        });
+        addCustomerButton.setOnAction(e -> {
             try {
-                start(loginPage);
+                addCustomerPage(loginPage,managerStage);
                 managerStage.close();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        
-        
+        deleteCustomerButton.setOnAction(e -> {
+            try {
+                addCustomerPage(loginPage,managerStage);
+                managerStage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         
         //creating scene
         Scene scene = new Scene(root);
@@ -210,22 +220,180 @@ public class Client extends Application {
         
     }
     
-    public void addCustomerPage() {
+    public void addCustomerPage(Stage loginPage, Stage mainPage) throws FileNotFoundException {
+        //creating new stage
+        Stage addCustomerPage = new Stage();
+        
+        //creating nodes
+        Image image = new Image(new FileInputStream("src\\project\\Images\\managerbackground.jpg")); 
+        Image image1 = new Image(new FileInputStream("src\\project\\Images\\logout.png"));
+        Image image2 = new Image(new FileInputStream("src\\project\\Images\\mainmenu.png"));
+        ImageView imageV1 = new ImageView(image1);
+        ImageView imageV2 = new ImageView(image2);
+        BackgroundImage background = new BackgroundImage(image,null,null,BackgroundPosition.CENTER,null);
+        Button logoutButton = new Button("Logout",imageV1);
+        Button exitButton = new Button("Exit",imageV2);
+        ToolBar toolBar = new ToolBar();
+        TextField usernameTF = new TextField();
+        TextField passwordTF = new TextField();
+        Label usernameLabel = new Label("Username:",usernameTF);
+        Label passwordLabel = new Label(" Password:",passwordTF);
+        Button addCustomerButton = new Button("Add");
+        Label addCustomerLabel = new Label("Add Customer:");
+        
+        //setting node properties
+        toolBar.getItems().addAll(logoutButton,exitButton);
+        toolBar.setStyle("-fx-background-color:#0E67CC");
+        toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        logoutButton.setStyle("-fx-font-size:15px");
+        logoutButton.setMinHeight(20);
+        logoutButton.setMinWidth(40);
+        imageV1.setFitHeight(15);
+        imageV1.setFitWidth(15);
+        exitButton.setStyle("-fx-font-size:15px");
+        exitButton.setMinHeight(20);
+        exitButton.setMinWidth(40);
+        imageV2.setFitHeight(15);
+        imageV2.setFitWidth(15);
+        usernameLabel.setContentDisplay(ContentDisplay.RIGHT);
+        usernameLabel.setTextFill(Color.BLACK);
+        passwordLabel.setContentDisplay(ContentDisplay.RIGHT);
+        passwordLabel.setTextFill(Color.BLACK);
+        usernameLabel.setFont(new Font("Open Sans",15));
+        passwordLabel.setFont(new Font("Open Sans",15));
+        usernameTF.setPrefWidth(180);
+        passwordTF.setPrefWidth(180);
+        addCustomerButton.setMinWidth(120);
+        addCustomerButton.setMinHeight(50);
+        addCustomerButton.setStyle("-fx-font-size:20px");
+        addCustomerLabel.setStyle("-fx-font-size:50px");
+        addCustomerLabel.setTextFill(Color.BLACK);
+
+        //creating layout
+        VBox root = new VBox();
+        
+        //setting layout properties
+        root.getChildren().addAll(toolBar,addCustomerLabel,usernameLabel,passwordLabel,addCustomerButton);
+        root.setSpacing(70);
+        root.setAlignment(Pos.BASELINE_CENTER);
+        root.setBackground(new Background(background));
+        VBox.setMargin(usernameLabel,new Insets(0,80,0,0));
+        VBox.setMargin(passwordLabel,new Insets(0,80,0,0));
+        VBox.setMargin(addCustomerButton,new Insets(0,30,0,0));
+
+        
+        
+        //creating action event handlers
+        logoutButton.setOnAction(e -> {
+            requestLogout(loginPage,addCustomerPage);
+        });
+        exitButton.setOnAction(e -> {
+            try {
+                managerPage(loginPage);
+                addCustomerPage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        addCustomerButton.setOnAction(e -> {
+            try {
+                
+                user.handleAddCustomer(this,usernameTF.getText(),passwordTF.getText());
+                usernameTF.deleteText(0, usernameTF.getText().length());
+                passwordTF.deleteText(0, passwordTF.getText().length());
+                
+            }catch(Exception x) {
+                
+            }
+        });
+                
+        //creating scene
+        Scene scene = new Scene(root);
+        
+        //setting stage properties
+        addCustomerPage.setTitle("Bank Account");
+        addCustomerPage.setWidth(1024);
+        addCustomerPage.setHeight(683);
+        addCustomerPage.setScene(scene);
+        addCustomerPage.setResizable(false);
+        addCustomerPage.show();
         
     }
     
-    public void deleteCustomerPage() {
+    public void deleteCustomerPage(Stage loginPage) throws FileNotFoundException {
+        //creating new stage
+        Stage deleteCustomerPage = new Stage();
         
+        //creating nodes
+        Image image = new Image(new FileInputStream("src\\project\\Images\\managerbackground.jpg")); 
+        Image image1 = new Image(new FileInputStream("src\\project\\Images\\logout.png"));
+        Image image2 = new Image(new FileInputStream("src\\project\\Images\\mainmenu.png"));
+        ImageView imageV1 = new ImageView(image1);
+        ImageView imageV2 = new ImageView(image2);
+        BackgroundImage background = new BackgroundImage(image,null,null,BackgroundPosition.CENTER,null);
+        Button logoutButton = new Button("Logout",imageV1);
+        Button exitButton = new Button("Exit",imageV2);
+        ToolBar toolBar = new ToolBar();
+        
+
+        //setting node properties
+        toolBar.getItems().addAll(logoutButton,exitButton);
+        toolBar.setStyle("-fx-background-color:#0E67CC");
+        toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        logoutButton.setStyle("-fx-font-size:15px");
+        logoutButton.setMinHeight(20);
+        logoutButton.setMinWidth(40);
+        imageV1.setFitHeight(15);
+        imageV1.setFitWidth(15);
+        exitButton.setStyle("-fx-font-size:15px");
+        exitButton.setMinHeight(20);
+        exitButton.setMinWidth(40);
+        imageV2.setFitHeight(15);
+        imageV2.setFitWidth(15);
+        
+        //creating layout
+        VBox root = new VBox();
+        
+        //setting layout properties
+        root.getChildren().addAll(toolBar);
+        root.setSpacing(100);
+        root.setAlignment(Pos.BASELINE_CENTER);
+        root.setBackground(new Background(background));
+        
+        
+        //creating action event handlers
+        logoutButton.setOnAction(e -> {
+            requestLogout(loginPage,deleteCustomerPage);
+        });
+        exitButton.setOnAction(e -> {
+            try {
+                managerPage(loginPage);
+                deleteCustomerPage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+                
+        //creating scene
+        Scene scene = new Scene(root);
+        
+        //setting stage properties
+        deleteCustomerPage.setTitle("Bank Account");
+        deleteCustomerPage.setWidth(1024);
+        deleteCustomerPage.setHeight(683);
+        deleteCustomerPage.setScene(scene);
+        deleteCustomerPage.setResizable(false);
+        deleteCustomerPage.show();
     }
 
-    //authenticates the user credentials calls the appropriate page
-    public void authenticateUser (Stage loginPage,String username, String password, String role)  {
+    //authenticates the user credentials and sets the user state
+    public void requestLogin (Stage loginPage,String username, String password, String role)  {
         
         //try-catch clause where the state change is handled by the login method of the concrete class
         try {
             if(role.equals("manager")) {
                 user = new Manager(username,password,role);
-                user.login(this,username,password);
+                user.handleLogin(this,username,password);
             }
         }catch(Exception e) {   //concrete class will throw an exception when credentials are incorrect
             Alert alert = new Alert(AlertType.ERROR);
@@ -236,7 +404,9 @@ public class Client extends Application {
             
             user = null;
         }
-           
+        
+        
+        //moves to the corresponding page depending on user state
         if(user instanceof Manager) {
             //close stage
             loginPage.close();
@@ -250,11 +420,27 @@ public class Client extends Application {
         } 
     }
     
+    //sets the user state to null
+    public void requestLogout(Stage loginPage, Stage currentStage) {
+        try {
+            user.handleLogout(this); 
+            start(loginPage);
+            currentStage.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
     //set the user object type
     public void setUser(Users user) {
         this.user = user;
     }
    
+    //returns the ArrayList of customers
+    public ArrayList<Users> getCustomers() {
+        return customers;
+    }
     
     public static void main(String[] args) {
         launch(args);

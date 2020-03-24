@@ -9,15 +9,15 @@ package project;
  *
  * @author Jules
  */
-public class BankAccount implements Cloneable{
+public class BankAccount{
     private int fundsAmount;
     
     public BankAccount() {
         fundsAmount = 100;
     }
     
-    public void showFunds() {
-        //
+    public int showFunds() {
+        return fundsAmount;
     }
     
     public void withdrawMoney(int amount) {

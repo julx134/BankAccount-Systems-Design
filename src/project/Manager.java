@@ -5,7 +5,9 @@
  */
 package project;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -30,9 +32,24 @@ public class Manager extends Users{
         return instance;
     }
 
+    @Override
+    public void handleAddCustomer(Client c, String username, String password) throws Exception {
+        File newCustomerFile = new File("src\\project\\CustomerInformation\\"+username+".txt");
+        
+        if(newCustomerFile.createNewFile()) {
+            FileWriter writeFile = new FileWriter(newCustomerFile);
+            writeFile.write(username+"\n");
+            writeFile.write(password+"\n");
+            writeFile.write("customer");
+            writeFile.close();
+        }else {
+            System.out.println("test");
+        }
+            
+    }
     
     @Override
-    public void login(Client c, String username, String password) throws Exception{
+    public void handleLogin(Client c, String username, String password) throws Exception{
         boolean usernameCheck = false, passwordCheck = false;
          
         try {
@@ -60,8 +77,8 @@ public class Manager extends Users{
     }
     
     @Override
-    public void logout(Client c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void handleLogout(Client c) {
+        c.setUser(null);
     }
     
 }
