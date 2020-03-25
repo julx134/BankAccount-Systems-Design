@@ -5,13 +5,12 @@
  */
 package project;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -33,52 +32,45 @@ public class Manager extends Users{
     }
 
     @Override
-    public void handleAddCustomer(Client c, String username, String password) throws Exception {
-        File newCustomerFile = new File("src\\project\\CustomerInformation\\"+username+".txt");
-        
-        if(newCustomerFile.createNewFile()) {
-            FileWriter writeFile = new FileWriter(newCustomerFile);
-            writeFile.write(username+"\n");
-            writeFile.write(password+"\n");
-            writeFile.write("customer");
-            writeFile.close();
-        }else {
-            System.out.println("test");
-        }
+    public void handleAddCustomer(Client c, String username, String password) throws Exception {    
+        if(!(username.equals("")) && !(password.equals(""))) {
+            File newCustomerFile = new File("src\\project\\CustomerInformation\\"+username+".txt");  
             
+            if (newCustomerFile.createNewFile()){
+                FileWriter writeFile = new FileWriter(newCustomerFile);
+                writeFile.write(username+"\n");
+                writeFile.write(password+"\n");
+                writeFile.write("customer");
+                writeFile.close();
+            }else {
+                throw new Exception();
+            }
+            
+            //creates a new SilverCustomer and adds it to array list of customers
+            c.getCustomers().add(new SilverCustomer(username,password,"customer",new BankAccount(),newCustomerFile));
+        }else {
+            throw new Exception();
+        }     
     }
     
     @Override
+    public void handleDeleteCustomer(Client c,int i) {
+        c.getCustomers().get(i).getCredentials().delete();
+        c.getCustomers().remove(i);    
+    }
+ 
+    
+    @Override
     public void handleLogin(Client c, String username, String password) throws Exception{
-        boolean usernameCheck = false, passwordCheck = false;
          
-        try {
-            
-            File credentials = new File("src\\project\\ManagerInformation\\admin.txt");
-  
-            Scanner input = new Scanner(credentials);
-            while (input.hasNextLine()) {
-                String data = input.nextLine();
-                
-                if(data.equals(username))
-                    usernameCheck = true;
-                if(data.equals(password))
-                    passwordCheck = true;
-            }
-            input.close();
-        } catch (FileNotFoundException e) {
-            //
-        }
-        if (usernameCheck && passwordCheck) {
+        if(username.equals("admin") && password.equals("admin"))
             c.setUser(getInstance());
-        }else {
+        else
             throw new Exception();
-        }   
     }
     
     @Override
     public void handleLogout(Client c) {
         c.setUser(null);
-    }
-    
+    }    
 }

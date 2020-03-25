@@ -6,17 +6,15 @@
 package project;
 
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -29,14 +27,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -53,7 +48,7 @@ public class Client extends Application {
     private String username,password,role;
     
     
-     @Override
+    @Override
     public void start(Stage loginStage) throws FileNotFoundException { 
         
         //creating nodes
@@ -139,6 +134,20 @@ public class Client extends Application {
         
     }
       
+    @Override
+    public void stop() {
+        File dir = new File("src\\project\\CustomerInformation");
+        
+        File[] files = dir.listFiles();
+        for (File file: files) {
+            try {
+                file.delete();
+            }catch (Exception e) {
+                System.out.println("Not deleted");
+            }
+        }
+    }
+    
     public void managerPage(Stage loginPage) throws FileNotFoundException {
         //creating stage
         Stage managerStage = new Stage();
@@ -200,7 +209,7 @@ public class Client extends Application {
         });
         deleteCustomerButton.setOnAction(e -> {
             try {
-                addCustomerPage(loginPage,managerStage);
+                deleteCustomerPage(loginPage,managerStage);
                 managerStage.close();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -232,7 +241,7 @@ public class Client extends Application {
         ImageView imageV2 = new ImageView(image2);
         BackgroundImage background = new BackgroundImage(image,null,null,BackgroundPosition.CENTER,null);
         Button logoutButton = new Button("Logout",imageV1);
-        Button exitButton = new Button("Exit",imageV2);
+        Button exitButton = new Button("Main Menu",imageV2);
         ToolBar toolBar = new ToolBar();
         TextField usernameTF = new TextField();
         TextField passwordTF = new TextField();
@@ -246,13 +255,11 @@ public class Client extends Application {
         toolBar.setStyle("-fx-background-color:#0E67CC");
         toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         logoutButton.setStyle("-fx-font-size:15px");
-        logoutButton.setMinHeight(20);
-        logoutButton.setMinWidth(40);
+        logoutButton.setMinSize(40,20);
         imageV1.setFitHeight(15);
         imageV1.setFitWidth(15);
         exitButton.setStyle("-fx-font-size:15px");
-        exitButton.setMinHeight(20);
-        exitButton.setMinWidth(40);
+        exitButton.setMinSize(40,20);
         imageV2.setFitHeight(15);
         imageV2.setFitWidth(15);
         usernameLabel.setContentDisplay(ContentDisplay.RIGHT);
@@ -263,8 +270,7 @@ public class Client extends Application {
         passwordLabel.setFont(new Font("Open Sans",15));
         usernameTF.setPrefWidth(180);
         passwordTF.setPrefWidth(180);
-        addCustomerButton.setMinWidth(120);
-        addCustomerButton.setMinHeight(50);
+        addCustomerButton.setMinSize(120,50);
         addCustomerButton.setStyle("-fx-font-size:20px");
         addCustomerLabel.setStyle("-fx-font-size:50px");
         addCustomerLabel.setTextFill(Color.BLACK);
@@ -296,15 +302,11 @@ public class Client extends Application {
             }
         });
         addCustomerButton.setOnAction(e -> {
-            try {
-                
-                user.handleAddCustomer(this,usernameTF.getText(),passwordTF.getText());
-                usernameTF.deleteText(0, usernameTF.getText().length());
-                passwordTF.deleteText(0, passwordTF.getText().length());
-                
-            }catch(Exception x) {
-                
-            }
+            
+            requestAddCustomer(usernameTF.getText(),passwordTF.getText());
+            usernameTF.deleteText(0, usernameTF.getText().length());
+            passwordTF.deleteText(0, passwordTF.getText().length());
+                       
         });
                 
         //creating scene
@@ -320,7 +322,8 @@ public class Client extends Application {
         
     }
     
-    public void deleteCustomerPage(Stage loginPage) throws FileNotFoundException {
+    @SuppressWarnings("empty-statement")
+    public void deleteCustomerPage(Stage loginPage, Stage mainPage) throws FileNotFoundException {
         //creating new stage
         Stage deleteCustomerPage = new Stage();
         
@@ -334,28 +337,33 @@ public class Client extends Application {
         Button logoutButton = new Button("Logout",imageV1);
         Button exitButton = new Button("Exit",imageV2);
         ToolBar toolBar = new ToolBar();
+        MenuButton menuButton = new MenuButton("Select Customer");
+        Button deleteButton = new Button("Delete");
         
-
+        
         //setting node properties
         toolBar.getItems().addAll(logoutButton,exitButton);
         toolBar.setStyle("-fx-background-color:#0E67CC");
         toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         logoutButton.setStyle("-fx-font-size:15px");
-        logoutButton.setMinHeight(20);
-        logoutButton.setMinWidth(40);
+        logoutButton.setMinSize(40,20);
         imageV1.setFitHeight(15);
         imageV1.setFitWidth(15);
         exitButton.setStyle("-fx-font-size:15px");
-        exitButton.setMinHeight(20);
-        exitButton.setMinWidth(40);
+        exitButton.setMinSize(40,20);
         imageV2.setFitHeight(15);
-        imageV2.setFitWidth(15);
+        imageV2.setFitWidth(15);  
+        menuButton.setMinSize(330, 70);
+        menuButton.setStyle("-fx-font-size:25px");
+        deleteButton.setMinSize(120,50);
+        deleteButton.setStyle("-fx-font-size:20px");
+        
         
         //creating layout
         VBox root = new VBox();
         
         //setting layout properties
-        root.getChildren().addAll(toolBar);
+        root.getChildren().addAll(toolBar,menuButton);
         root.setSpacing(100);
         root.setAlignment(Pos.BASELINE_CENTER);
         root.setBackground(new Background(background));
@@ -373,6 +381,30 @@ public class Client extends Application {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+        
+        //setting customers as labels in the menuButton and deleting that instance from customer list.
+        for (Users customer : customers) {
+            MenuItem customerItem = new MenuItem(customer.toString());
+            customerItem.setStyle("-fx-font-size:25px");
+            try {
+                menuButton.getItems().add(customerItem);
+            }catch (IllegalArgumentException e) {
+                e.addSuppressed(e);
+            }
+            
+            customerItem.setOnAction(e -> {
+                menuButton.setText(customer.toString());
+                root.getChildren().addAll(deleteButton);
+                
+                deleteButton.setOnAction(x-> {
+                    System.out.println(customer.toString());
+                    requestDeleteCustomer(menuButton.getItems().indexOf(customerItem));
+                    menuButton.setText("Select Customer");
+                    menuButton.getItems().remove(customerItem);
+                    root.getChildren().remove(deleteButton);
+                });
+            });  
+        }
                 
         //creating scene
         Scene scene = new Scene(root);
@@ -429,6 +461,31 @@ public class Client extends Application {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+    }
+    
+    //adds the customer to customer arraylist
+    public void requestAddCustomer(String username, String password){
+        try {
+            user.handleAddCustomer(this,username,password);
+            
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("CONFIRMATION");
+            alert.setHeaderText("Congratulations!");
+            alert.setContentText("A new customer has been created");
+            alert.showAndWait();
+        }catch (Exception x) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error!");
+            alert.setContentText("Either there is an account associated with this username or the username/password field is empty");
+            alert.showAndWait();
+        }             
+    }
+
+    //
+    public void requestDeleteCustomer(int i) {
+        user.handleDeleteCustomer(this, i);
         
     }
     
