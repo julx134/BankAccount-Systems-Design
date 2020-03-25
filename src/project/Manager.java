@@ -5,12 +5,7 @@
  */
 package project;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Scanner;
 
 /**
  *
@@ -30,7 +25,13 @@ public class Manager extends Users{
             instance = new Manager("admin","admin","manager");
         return instance;
     }
-
+    
+    //for init function in client - reads already existing files
+    public void handleInitAddCustomer(Client c, String username, String password, File newCustomerFile) {
+        //creates a new SilverCustomer and adds it to array list of customers
+        c.getCustomers().add(new SilverCustomer(username,password,"customer",new BankAccount(),newCustomerFile));
+    }
+        
     @Override
     public void handleAddCustomer(Client c, String username, String password) throws Exception {    
         if(!(username.equals("")) && !(password.equals(""))) {
@@ -38,9 +39,11 @@ public class Manager extends Users{
             
             if (newCustomerFile.createNewFile()){
                 FileWriter writeFile = new FileWriter(newCustomerFile);
-                writeFile.write(username+"\n");
-                writeFile.write(password+"\n");
-                writeFile.write("customer");
+                writeFile.write("Username:\n"+username+"\n");
+                writeFile.write("Password:\n"+password+"\n");
+                writeFile.write("Funds:\n100\n");
+                writeFile.write("Level:\nSilver\n");
+                writeFile.write("Role:\nCustomer");
                 writeFile.close();
             }else {
                 throw new Exception();

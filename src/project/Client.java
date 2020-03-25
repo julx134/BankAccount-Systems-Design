@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -20,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -29,6 +32,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -47,6 +51,47 @@ public class Client extends Application {
     private Users user;
     private String username,password,role;
     
+    @Override
+    public void init() throws Exception {
+        boolean username = false, password = false;
+        String usernameString="",passwordString="";
+        
+        File dir = new File("src\\project\\CustomerInformation");
+        File[] files = dir.listFiles();
+      
+        for (File file: files) {
+            try {
+                Scanner input = new Scanner(file);
+                
+                while (input.hasNextLine()) {
+                String data = input.nextLine();
+                
+                    switch (data) {
+                        case "Username:":
+                            username = true;
+                            break;
+                        case "Password:":
+                            password = true;
+                            break;
+                        default:
+                            if(username) {
+                                username = false;
+                                usernameString = data;
+                            }
+                            if(password) {
+                                password = false;
+                                passwordString = data;
+                            }
+                    }
+                }   
+            input.close();
+            System.out.println(usernameString+","+passwordString);
+            Manager.getInstance().handleInitAddCustomer(this, usernameString, passwordString,file);
+            }catch (Exception e) {
+                System.out.println("Not deleted");
+            }       
+        }
+    }
     
     @Override
     public void start(Stage loginStage) throws FileNotFoundException { 
@@ -120,9 +165,31 @@ public class Client extends Application {
                 requestLogin(loginStage,username,password,role);
             }
         });
+       
         
         //creating scene
         Scene scene = new Scene(root);
+        //when the enter button is pressed
+        scene.setOnKeyPressed(e -> {
+            if (role == null) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error!");
+                alert.setContentText("There is an error with the way you logged in.\n");
+                alert.showAndWait();
+                usernameTF.deleteText(0, usernameTF.getText().length());
+                passwordTF.deleteText(0, passwordTF.getText().length());
+            }else if (e.getCode() == KeyCode.ENTER) {
+                username = usernameTF.getText();
+                usernameTF.deleteText(0, usernameTF.getText().length());
+                password = passwordTF.getText();
+                passwordTF.deleteText(0, passwordTF.getText().length());
+                
+                //passes the request to concrete state class
+                requestLogin(loginStage,username,password,role);
+            }
+        });
+        
         
         //creating stage
         loginStage.setTitle("Bank Account");
@@ -133,21 +200,7 @@ public class Client extends Application {
         loginStage.show();
         
     }
-      
-    @Override
-    public void stop() {
-        File dir = new File("src\\project\\CustomerInformation");
-        
-        File[] files = dir.listFiles();
-        for (File file: files) {
-            try {
-                file.delete();
-            }catch (Exception e) {
-                System.out.println("Not deleted");
-            }
-        }
-    }
-    
+         
     public void managerPage(Stage loginPage) throws FileNotFoundException {
         //creating stage
         Stage managerStage = new Stage();
@@ -302,7 +355,6 @@ public class Client extends Application {
             }
         });
         addCustomerButton.setOnAction(e -> {
-            
             requestAddCustomer(usernameTF.getText(),passwordTF.getText());
             usernameTF.deleteText(0, usernameTF.getText().length());
             passwordTF.deleteText(0, passwordTF.getText().length());
@@ -311,6 +363,15 @@ public class Client extends Application {
                 
         //creating scene
         Scene scene = new Scene(root);
+        //when the enter button is pressed
+        scene.setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ENTER) {
+                requestAddCustomer(usernameTF.getText(),passwordTF.getText());
+                usernameTF.deleteText(0, usernameTF.getText().length());
+                passwordTF.deleteText(0, passwordTF.getText().length());
+            }
+        });
+        
         
         //setting stage properties
         addCustomerPage.setTitle("Bank Account");
@@ -335,7 +396,7 @@ public class Client extends Application {
         ImageView imageV2 = new ImageView(image2);
         BackgroundImage background = new BackgroundImage(image,null,null,BackgroundPosition.CENTER,null);
         Button logoutButton = new Button("Logout",imageV1);
-        Button exitButton = new Button("Exit",imageV2);
+        Button exitButton = new Button("Main Menu",imageV2);
         ToolBar toolBar = new ToolBar();
         MenuButton menuButton = new MenuButton("Select Customer");
         Button deleteButton = new Button("Delete");
@@ -397,17 +458,18 @@ public class Client extends Application {
                 root.getChildren().addAll(deleteButton);
                 
                 deleteButton.setOnAction(x-> {
-                    System.out.println(customer.toString());
-                    requestDeleteCustomer(menuButton.getItems().indexOf(customerItem));
-                    menuButton.setText("Select Customer");
-                    menuButton.getItems().remove(customerItem);
-                    root.getChildren().remove(deleteButton);
+                    if (requestDeleteCustomer(menuButton.getItems().indexOf(customerItem))) {
+                        menuButton.setText("Select Customer");
+                        menuButton.getItems().remove(customerItem);
+                        root.getChildren().remove(deleteButton);
+                    }
                 });
             });  
         }
                 
         //creating scene
         Scene scene = new Scene(root);
+
         
         //setting stage properties
         deleteCustomerPage.setTitle("Bank Account");
@@ -417,7 +479,7 @@ public class Client extends Application {
         deleteCustomerPage.setResizable(false);
         deleteCustomerPage.show();
     }
-
+    
     //authenticates the user credentials and sets the user state
     public void requestLogin (Stage loginPage,String username, String password, String role)  {
         
@@ -483,17 +545,26 @@ public class Client extends Application {
         }             
     }
 
-    //
-    public void requestDeleteCustomer(int i) {
-        user.handleDeleteCustomer(this, i);
+    //deletes the file and corresponding menuItem
+    public boolean requestDeleteCustomer(int i) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Are you sure you want to delete this customer?");
         
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK) {
+            user.handleDeleteCustomer(this, i);
+            return true;
+        }else {
+            return false;
+        }
     }
     
     //set the user object type
     public void setUser(Users user) {
         this.user = user;
     }
-   
+    
     //returns the ArrayList of customers
     public ArrayList<Users> getCustomers() {
         return customers;

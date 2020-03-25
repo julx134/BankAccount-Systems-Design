@@ -1,3 +1,10 @@
+Username:
 123
+Password:
 123
-customer
+Funds:
+100
+Level:
+Silver
+Role:
+Customer

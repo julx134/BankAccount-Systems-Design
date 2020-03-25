@@ -42,9 +42,7 @@ public abstract class Users {
     public void handleDeleteCustomer(Client c, int i) {}
     
     //normal methods to be overriden by customer sub-class
-    public void checkLevel() {
-        
-    }
+    public void checkLevel() {}
 
     @Override
     public String toString() {
