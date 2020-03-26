@@ -9,6 +9,8 @@ package project;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
@@ -53,8 +55,8 @@ public class Client extends Application {
     
     @Override
     public void init() throws Exception {
-        boolean username = false, password = false;
-        String usernameString="",passwordString="";
+        boolean username = false, password = false, level = false,funds=false;
+        String usernameString="", passwordString="", levelString="", fundsString="";
         
         File dir = new File("src\\project\\CustomerInformation");
         File[] files = dir.listFiles();
@@ -73,6 +75,13 @@ public class Client extends Application {
                         case "Password:":
                             password = true;
                             break;
+                        case "Level:":
+                            level = true;
+                            break;
+                        case "Funds:":
+                            funds = true;
+                            break;
+                            
                         default:
                             if(username) {
                                 username = false;
@@ -82,13 +91,20 @@ public class Client extends Application {
                                 password = false;
                                 passwordString = data;
                             }
+                            if(level) {
+                                level = false;
+                                levelString = data;
+                            }
+                            if(funds) {
+                                funds = false;
+                                fundsString = data;
+                            }
                     }
                 }   
             input.close();
-            System.out.println(usernameString+","+passwordString);
-            Manager.getInstance().handleInitAddCustomer(this, usernameString, passwordString,file);
+            Manager.getInstance().handleInitAddCustomer(this, usernameString, passwordString,levelString, fundsString,file);
             }catch (Exception e) {
-                System.out.println("Not deleted");
+                
             }       
         }
     }
@@ -222,7 +238,7 @@ public class Client extends Application {
         
         //setting node properties
         toolBar.getItems().add(logoutButton);
-        toolBar.setStyle("-fx-background-color:#0E67CC");
+        toolBar.setStyle("-fx-background-color:transparent");
         toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         logoutButton.setStyle("-fx-font-size:15px");
         logoutButton.setMinHeight(20);
@@ -305,7 +321,7 @@ public class Client extends Application {
         
         //setting node properties
         toolBar.getItems().addAll(logoutButton,exitButton);
-        toolBar.setStyle("-fx-background-color:#0E67CC");
+        toolBar.setStyle("-fx-background-color:transparent");
         toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         logoutButton.setStyle("-fx-font-size:15px");
         logoutButton.setMinSize(40,20);
@@ -404,7 +420,7 @@ public class Client extends Application {
         
         //setting node properties
         toolBar.getItems().addAll(logoutButton,exitButton);
-        toolBar.setStyle("-fx-background-color:#0E67CC");
+        toolBar.setStyle("-fx-background-color:transparent");
         toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         logoutButton.setStyle("-fx-font-size:15px");
         logoutButton.setMinSize(40,20);
@@ -480,15 +496,194 @@ public class Client extends Application {
         deleteCustomerPage.show();
     }
     
+    public void customerPage(Stage loginPage) throws FileNotFoundException {
+        //creating stage
+        Stage customerStage = new Stage();
+        
+        //creating nodes
+        Image image1 = new Image(new FileInputStream("src\\project\\Images\\balance.png"));
+        Image image2 = new Image(new FileInputStream("src\\project\\Images\\deposit.png"));
+        Image image3 = new Image(new FileInputStream("src\\project\\Images\\atm.png"));
+        Image image4 = new Image(new FileInputStream("src\\project\\Images\\card.png"));
+        Image image5 = new Image(new FileInputStream("src\\project\\Images\\logout.png"));
+        ImageView balanceImage = new ImageView(image1);
+        ImageView depositImage = new ImageView(image2);
+        ImageView withdrawImage = new ImageView(image3);
+        ImageView purchaseImage = new ImageView(image4);
+        ImageView logoutImage = new ImageView(image5);
+        BackgroundImage backgroundImage = null;
+        Button logoutButton = new Button("Logout",logoutImage);
+        Button checkBalanceButton = new Button("Check Balance",balanceImage);
+        Button depositButton = new Button("Deposit Money",depositImage);
+        Button withdrawButton = new Button("Withdraw Money",withdrawImage);
+        Button onlinePurchaseButton = new Button("Online Shopping",purchaseImage);        
+        ToolBar toolBar = new ToolBar(); 
+        
+        
+        //setting node properties
+        toolBar.getItems().add(logoutButton);
+        toolBar.setStyle("-fx-background-color:transparent");
+        toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        logoutButton.setStyle("-fx-font-size:15px");
+        logoutButton.setMinSize(40,20);
+        logoutImage.setFitHeight(15);
+        logoutImage.setFitWidth(15);
+        
+        checkBalanceButton.setMinSize(230, 60);
+        checkBalanceButton.setStyle("-fx-font-size:23px");
+        balanceImage.setFitHeight(50);
+        balanceImage.setFitWidth(50);
+        
+        depositButton.setMinSize(230, 60);
+        depositButton.setStyle("-fx-font-size:22px");
+        depositImage.setFitHeight(50);
+        depositImage.setFitWidth(50);
+        
+        withdrawButton.setMinSize(230, 60);
+        withdrawButton.setStyle("-fx-font-size:20px");
+        withdrawImage.setFitHeight(50);
+        withdrawImage.setFitWidth(50);
+        
+        onlinePurchaseButton.setMinSize(230, 60);
+        onlinePurchaseButton.setStyle("-fx-font-size:22px");
+        purchaseImage.setFitHeight(35);
+        purchaseImage.setFitWidth(35);
+        
+       
+        //creating layout
+        VBox root = new VBox();
+        
+        //setting layout properties
+        root.getChildren().addAll(toolBar,checkBalanceButton,depositButton,withdrawButton,onlinePurchaseButton);
+        root.setSpacing(50);
+        root.setAlignment(Pos.BASELINE_CENTER);
+        setCustomerBackground(root,backgroundImage);
+      
+
+        //creating action event handlers
+        logoutButton.setOnAction(e -> {
+            requestLogout(loginPage,customerStage);
+        });
+        
+        checkBalanceButton.setOnAction(e -> {
+            try {
+                balancePage(loginPage,customerStage);
+                customerStage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        //creating scene
+        Scene scene = new Scene(root);
+        
+        //setting stage properties  
+        customerStage.setTitle("Bank Account");
+        customerStage.setWidth(1024);
+        customerStage.setHeight(683);
+        customerStage.setScene(scene);
+        customerStage.setResizable(false);
+        customerStage.show();
+        
+    }
+    
+    public void balancePage(Stage loginPage, Stage mainPage)throws FileNotFoundException {
+        //creating stage
+        Stage balancePage = new Stage();
+        
+        //creating nodes
+        BackgroundImage backgroundImage = null;
+        Image image5 = new Image(new FileInputStream("src\\project\\Images\\logout.png"));
+        Image image2 = new Image(new FileInputStream("src\\project\\Images\\mainmenu.png"));
+        ImageView logoutImage = new ImageView(image5);
+        ImageView imageV2 = new ImageView(image2);
+        Button logoutButton = new Button("Logout",logoutImage);
+        Button exitButton = new Button("Main Menu",imageV2);
+        ToolBar toolBar = new ToolBar();
+        Label headerLabel = new Label("Balance:");
+        Label balanceLabel = new Label("");
+        
+        //setting node properties
+        toolBar.getItems().addAll(logoutButton,exitButton);
+        toolBar.setStyle("-fx-background-color:transparent");
+        toolBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        logoutButton.setStyle("-fx-font-size:15px");
+        logoutButton.setMinSize(40,20);
+        logoutImage.setFitHeight(15);
+        logoutImage.setFitWidth(15);
+        exitButton.setStyle("-fx-font-size:15px");
+        exitButton.setMinSize(40,20);
+        imageV2.setFitHeight(15);
+        imageV2.setFitWidth(15);
+        balanceLabel.setStyle("-fx-background-color:F7F6F6;"
+                + "-fx-font-size:80px");
+        balanceLabel.setTextFill(Color.GREEN);
+        NumberFormat formatter = new DecimalFormat("#.00");
+        balanceLabel.setText("  $"+formatter.format(user.getBankAccount().getFunds())+"  ");
+        headerLabel.setStyle("-fx-font-size:80px");
+        headerLabel.setTextFill(Color.BLACK);
+        
+        
+        //creating layout
+        VBox root = new VBox();
+        
+        //setting layout properties
+        root.getChildren().addAll(toolBar,headerLabel,balanceLabel);
+        root.setSpacing(10);
+        root.setAlignment(Pos.BASELINE_CENTER);
+        VBox.setMargin(headerLabel,new Insets(0,0,80,0));
+        setCustomerBackground(root,backgroundImage);
+        
+        //creating action event handlers
+        logoutButton.setOnAction(e -> {
+            requestLogout(loginPage,balancePage);
+        });
+        exitButton.setOnAction(e -> {
+            try {
+                customerPage(loginPage);
+                balancePage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        
+        //creating scene
+        Scene scene = new Scene(root);
+        
+        //setting stage properties
+        balancePage.setTitle("Bank Account");
+        balancePage.setWidth(1024);
+        balancePage.setHeight(683);
+        balancePage.setScene(scene);
+        balancePage.setResizable(false);
+        balancePage.show();
+      
+    }
+    
+    public void depositPage(Stage loginPage, Stage mainPage) {
+        
+    }
+    
+    public void withdrawPage(Stage loginPage, Stage mainPage) {
+        
+    }
+    
+    public void purchasePage(Stage loginPage, Stage mainPage) {
+        
+    }
+    
     //authenticates the user credentials and sets the user state
     public void requestLogin (Stage loginPage,String username, String password, String role)  {
         
         //try-catch clause where the state change is handled by the login method of the concrete class
         try {
-            if(role.equals("manager")) {
-                user = new Manager(username,password,role);
-                user.handleLogin(this,username,password);
-            }
+            if(role.equals("manager"))
+                Manager.getInstance().handleLogin(this,username,password);
+            
+            if(role.equals("customer")) 
+                Customer.getInstance().handleLogin(this, username, password);
+            
         }catch(Exception e) {   //concrete class will throw an exception when credentials are incorrect
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
@@ -512,6 +707,18 @@ public class Client extends Application {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
         } 
+        
+        if(user instanceof Customer) {
+            //close stage
+            loginPage.close();
+            
+            //move to next stage
+            try {
+                customerPage(loginPage);
+            }catch(FileNotFoundException ex) {
+                System.out.println("No such account exists");
+            }
+        }
     }
     
     //sets the user state to null
@@ -557,6 +764,27 @@ public class Client extends Application {
             return true;
         }else {
             return false;
+        }
+    }
+    
+    public void setCustomerBackground(VBox root, BackgroundImage backgroundImage) throws FileNotFoundException{
+        Image silverImage = new Image(new FileInputStream("src\\project\\Images\\silver.jpg"));
+        Image goldImage = new Image(new FileInputStream("src\\project\\Images\\gold.jpg")); 
+        Image platinumImage = new Image(new FileInputStream("src\\project\\Images\\platinum.jpg")); 
+        
+          switch (user.getLevel()) {
+            case "Silver":
+                backgroundImage = new BackgroundImage(silverImage,null,null,BackgroundPosition.CENTER,null);
+                root.setBackground(new Background(backgroundImage));
+                break;
+            case "Gold":
+                backgroundImage = new BackgroundImage(goldImage,null,null,BackgroundPosition.CENTER,null);
+                root.setBackground(new Background(backgroundImage));
+                break;
+            case "Platinum":
+                backgroundImage = new BackgroundImage(platinumImage,null,null,BackgroundPosition.CENTER,null);
+                root.setBackground(new Background(backgroundImage));
+                break;
         }
     }
     

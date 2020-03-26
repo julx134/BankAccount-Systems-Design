@@ -10,13 +10,17 @@ package project;
  * @author Jules
  */
 public class BankAccount{
-    private int fundsAmount;
+    private double fundsAmount;
     
     public BankAccount() {
-        fundsAmount = 100;
+        fundsAmount = 100.00;
     }
     
-    public int showFunds() {
+    public BankAccount(double initialFunds) {
+        fundsAmount = initialFunds;
+    }
+    
+    public double getFunds() {
         return fundsAmount;
     }
     

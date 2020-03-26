@@ -25,12 +25,26 @@ public abstract class Users {
     }
     
     //overloaded constructor for customer user type
-    public Users (String username, String password, String role, BankAccount bankAccount, File customerFile) {
+    public Users (String username, String password, String role, String level, BankAccount bankAccount, File customerFile) {
         this.username = username;
         this.password = password;
         this.role = role;   
         this.bankAccount = bankAccount;
+        this.level = level;
         credentials = customerFile;
+    }
+    
+    @Override
+    public String toString() {
+        return ("Username: "+username+"     "+"Level: "+level+"\n"); 
+    }
+         
+    public BankAccount getBankAccount() {
+        return bankAccount;
+    }
+    
+    public String getLevel() {
+        return level;
     }
     
     //abstract methods to be implemented by concrete sub-classes
@@ -40,21 +54,12 @@ public abstract class Users {
     //normal methods to be overridden by manager sub-class
     public void handleAddCustomer(Client c, String username, String password) throws Exception {}
     public void handleDeleteCustomer(Client c, int i) {}
-    
-    //normal methods to be overriden by customer sub-class
-    public void checkLevel() {}
-
-    @Override
-    public String toString() {
-        return ("Username: "+username+"     "+"Level: "+level+"\n"); 
-    }
-    
+        
     //normal methods to be overriden by both types of sub-classes
-    public String getUsername() {
+    protected String getUsername() {
         return username;
     }
-    
-    public File getCredentials() {
+    protected File getCredentials() {
         return credentials;
     }
     

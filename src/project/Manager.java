@@ -27,9 +27,9 @@ public class Manager extends Users{
     }
     
     //for init function in client - reads already existing files
-    public void handleInitAddCustomer(Client c, String username, String password, File newCustomerFile) {
+    public void handleInitAddCustomer(Client c, String username, String password,String level,String funds, File customerFile) {
         //creates a new SilverCustomer and adds it to array list of customers
-        c.getCustomers().add(new SilverCustomer(username,password,"customer",new BankAccount(),newCustomerFile));
+        c.getCustomers().add(new Customer(username,password,"customer",level,new BankAccount(Double.parseDouble(funds)),customerFile));
     }
         
     @Override
@@ -41,7 +41,7 @@ public class Manager extends Users{
                 FileWriter writeFile = new FileWriter(newCustomerFile);
                 writeFile.write("Username:\n"+username+"\n");
                 writeFile.write("Password:\n"+password+"\n");
-                writeFile.write("Funds:\n100\n");
+                writeFile.write("Funds:\n100.00\n");
                 writeFile.write("Level:\nSilver\n");
                 writeFile.write("Role:\nCustomer");
                 writeFile.close();
@@ -50,7 +50,7 @@ public class Manager extends Users{
             }
             
             //creates a new SilverCustomer and adds it to array list of customers
-            c.getCustomers().add(new SilverCustomer(username,password,"customer",new BankAccount(),newCustomerFile));
+            c.getCustomers().add(new Customer(username,password,"customer","Silver",new BankAccount(),newCustomerFile));
         }else {
             throw new Exception();
         }     
