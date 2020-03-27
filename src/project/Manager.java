@@ -61,8 +61,7 @@ public class Manager extends Users{
         c.getCustomers().get(i).getCredentials().delete();
         c.getCustomers().remove(i);    
     }
- 
-    
+   
     @Override
     public void handleLogin(Client c, String username, String password) throws Exception{
          

@@ -24,14 +24,26 @@ public class BankAccount{
         return fundsAmount;
     }
     
-    public void withdrawMoney(int amount) {
-        if (amount > fundsAmount) {
-            
+    public void deposit(double depositAmount) {
+        fundsAmount += depositAmount;
+    }
+    
+    public boolean withdraw(double withdrawAmount) {
+        fundsAmount -= withdrawAmount;
+        
+        if(repOK()) {
+            return true;
         }else {
-            fundsAmount -= amount;
+            fundsAmount += withdrawAmount;
+            return false;
         }
     }
     
-    
+    public boolean repOK() {
+        if (fundsAmount >= 0.00)
+            return true;
+        return false;
+    }
    
+    
 }

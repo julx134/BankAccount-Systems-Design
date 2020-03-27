@@ -3,8 +3,8 @@ test
 Password:
 test
 Funds:
-100.00
+10000.00
 Level:
-Silver
+Platinum
 Role:
 Customer

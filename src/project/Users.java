@@ -36,26 +36,16 @@ public abstract class Users {
     
     @Override
     public String toString() {
-        return ("Username: "+username+"     "+"Level: "+level+"\n"); 
+        return ("Username: "+username+"\t\t"+"Password: "+password+"\t\t"+"Level: "+level); 
     }
-         
-    public BankAccount getBankAccount() {
+    
+    //normal methods to be used by both types of sub-classes
+    protected BankAccount getBankAccount() {
         return bankAccount;
     }
-    
-    public String getLevel() {
+    protected String getLevel() {
         return level;
     }
-    
-    //abstract methods to be implemented by concrete sub-classes
-    public abstract void handleLogin(Client c,String username,String password) throws Exception;
-    public abstract void handleLogout(Client c);  
-    
-    //normal methods to be overridden by manager sub-class
-    public void handleAddCustomer(Client c, String username, String password) throws Exception {}
-    public void handleDeleteCustomer(Client c, int i) {}
-        
-    //normal methods to be overriden by both types of sub-classes
     protected String getUsername() {
         return username;
     }
@@ -63,4 +53,16 @@ public abstract class Users {
         return credentials;
     }
     
+    //abstract methods to be implemented by concrete sub-classes
+    protected abstract void handleLogin(Client c,String username,String password) throws Exception;
+    protected abstract void handleLogout(Client c);  
+    
+    //normal methods to be overridden by manager sub-class
+    protected void handleAddCustomer(Client c, String username, String password) throws Exception {}
+    protected void handleDeleteCustomer(Client c, int i) {}
+        
+    //normal methods to be overriden by customer sub-class
+    protected void handleDeposit (Client c, String depositAmount) throws Exception{}
+    protected void handleWithdraw (Client c, String withdrawAmount) throws Exception {}
+    protected boolean isLevelChanged (Client c) {return false;}
 }
