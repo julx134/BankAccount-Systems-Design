@@ -6,6 +6,7 @@
 package project;
 
 import java.io.File;
+import project.Exceptions.*;
 
 /**
  *
@@ -53,16 +54,25 @@ public abstract class Users {
         return credentials;
     }
     
+    protected void checkInput(String ...input) throws UndefinedInputException{
+        for(String checkString : input) {
+            if(checkString.equals(""))
+                throw new UndefinedInputException();     
+        }
+    }
+    
     //abstract methods to be implemented by concrete sub-classes
-    protected abstract void handleLogin(Client c,String username,String password) throws Exception;
+    protected abstract void handleLogin(Client c,String username,String password) throws UndefinedInputException,IncorrectLoginAttemptException;
     protected abstract void handleLogout(Client c);  
     
     //normal methods to be overridden by manager sub-class
-    protected void handleAddCustomer(Client c, String username, String password) throws Exception {}
+    protected void handleAddCustomer(Client c, String username, String password) throws UndefinedInputException,SameUsernameException {}
     protected void handleDeleteCustomer(Client c, int i) {}
         
     //normal methods to be overriden by customer sub-class
-    protected void handleDeposit (Client c, String depositAmount) throws Exception{}
-    protected void handleWithdraw (Client c, String withdrawAmount) throws Exception {}
+    protected void handleDeposit (Client c, String depositAmount) throws UndefinedInputException{}
+    protected void handleWithdraw (Client c, String withdrawAmount) throws UndefinedInputException,InsufficientFundsException {}
+    protected void handlePurchase (Client c, String purchaseAmount) throws InsufficientFundsException,LimitNotReachedException {}
+    protected String getTotalPurchase(Client c, String initialAmount){return null;}
     protected boolean isLevelChanged (Client c) {return false;}
 }

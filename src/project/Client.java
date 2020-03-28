@@ -5,10 +5,11 @@
  */
 package project;
 
-
+import project.Exceptions.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -38,6 +40,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -167,7 +170,7 @@ public class Client extends Application {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Error!");
-                alert.setContentText("There is an error with the way you logged in.\n");
+                alert.setContentText("You have not selected your role.\n");
                 alert.showAndWait();
                 usernameTF.deleteText(0, usernameTF.getText().length());
                 passwordTF.deleteText(0, passwordTF.getText().length());
@@ -191,7 +194,7 @@ public class Client extends Application {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Error!");
-                alert.setContentText("There is an error with the way you logged in.\n");
+                alert.setContentText("You have not selected your role.\n");
                 alert.showAndWait();
                 usernameTF.deleteText(0, usernameTF.getText().length());
                 passwordTF.deleteText(0, passwordTF.getText().length());
@@ -589,6 +592,14 @@ public class Client extends Application {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+        onlinePurchaseButton.setOnAction(e -> {
+            try {
+                purchasePage(loginPage,customerStage);
+                customerStage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         
         //creating scene
         Scene scene = new Scene(root);
@@ -777,6 +788,13 @@ public class Client extends Application {
         
         //creating scene
         Scene scene = new Scene(root);
+        //when the enter button is pressed
+        scene.setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ENTER) {
+                requestDeposit(this,depositTF.getText(),loginPage,depositPage);
+                depositTF.setText("Enter amount...");
+            }
+        });
         
         //setting stage properties
         depositPage.setTitle("Bank Account");
@@ -788,7 +806,7 @@ public class Client extends Application {
     }
     
     public void withdrawPage(Stage loginPage, Stage mainPage) throws FileNotFoundException {
-         //creating stage
+        //creating stage
         Stage withdrawPage = new Stage();
         
         //creating nodes
@@ -886,6 +904,12 @@ public class Client extends Application {
         
         //creating scene
         Scene scene = new Scene(root);
+        scene.setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ENTER) {
+                requestWithdraw(this,withdrawTF.getText(),loginPage,withdrawPage);
+                withdrawTF.setText("Enter amount...");
+            }
+        });
         
         //setting stage properties
         withdrawPage.setTitle("Bank Account");
@@ -896,8 +920,260 @@ public class Client extends Application {
         withdrawPage.show();
     }
     
-    public void purchasePage(Stage loginPage, Stage mainPage) {
+    public void purchasePage(Stage loginPage, Stage mainPage)throws FileNotFoundException {
+        //creating stage
+        Stage purchasePage = new Stage();
         
+        //creating nodes
+        BackgroundImage backgroundImage = null;
+        Image image5 = new Image(new FileInputStream("src\\project\\Images\\logout.png"));
+        Image image2 = new Image(new FileInputStream("src\\project\\Images\\mainmenu.png"));
+        ImageView logoutImage = new ImageView(image5);
+        ImageView imageV2 = new ImageView(image2);
+        Button logoutButton = new Button("Logout",logoutImage);
+        Button exitButton = new Button("Main Menu",imageV2);
+        Button purchaseButton = new Button("Purchase");
+        Button clearButton = new Button("Clear");
+        TextField purchaseTF = new TextField("0.00");
+        Label purchaseLabel = new Label("$",purchaseTF);
+        ToolBar purchaseBar = new ToolBar();
+        ToolBar toolBar = new ToolBar();
+        
+        
+        //setting node properties
+        toolBar.getItems().addAll(logoutButton,exitButton);
+        purchaseBar.getItems().addAll(clearButton,purchaseButton,purchaseLabel);
+        toolBar.setStyle("-fx-background-color:transparent");
+        toolBar.setNodeOrientation(NodeOrientation.INHERIT);
+        purchaseBar.setStyle("-fx-background-color:transparent;"
+                + "-fx-font-size:20px");
+        purchaseBar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        logoutButton.setStyle("-fx-font-size:15px");
+        logoutButton.setMinSize(40,20);
+        logoutImage.setFitHeight(15);
+        logoutImage.setFitWidth(15);
+        exitButton.setStyle("-fx-font-size:15px");
+        exitButton.setMinSize(40,20);
+        imageV2.setFitHeight(15);
+        imageV2.setFitWidth(15);
+        purchaseLabel.setTextFill(Color.GREEN);
+        purchaseTF.setEditable(false);
+        
+        HBox itemsColumn1 = new HBox(20);
+        HBox itemsColumn2 = new HBox(17);
+       
+        ImageView groceriesImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\groceries.png")));
+        Button groceries = new Button("$35.00   ",groceriesImage);
+        Label groceriesNum = new Label("0");
+        Label groceriesLabel = new Label("Groceries:\nx"+groceriesNum.getText(),groceries);
+        groceries.setMinSize(150,80);
+        groceriesLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black");
+        groceriesImage.setFitHeight(70);
+        groceriesImage.setFitWidth(75);
+        
+        ImageView clothingImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\clothing.png")));
+        Button clothing = new Button(" $75.00   ",clothingImage);
+        Label clothingNum = new Label("0");
+        Label clothingLabel = new Label("Clothes:   \nx"+clothingNum.getText(),clothing);
+        clothing.setMinSize(150,80);
+        clothingLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black");
+        clothingImage.setFitHeight(70);
+        clothingImage.setFitWidth(75);
+        
+        ImageView toiletPaperImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\toiletpaper.png")));
+        Button toiletPaper = new Button(" $100.00    ",toiletPaperImage);
+        Label toiletPaperNum = new Label("0");
+        Label toiletPaperLabel = new Label("Toilet Paper:\nx"+toiletPaperNum.getText(),toiletPaper);
+        toiletPaper.setMinSize(150,80);
+        toiletPaperLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black");
+        toiletPaperImage.setFitHeight(70);
+        toiletPaperImage.setFitWidth(75);
+        
+        ImageView jewellryImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\jewelry.png")));
+        Label jewellryNum = new Label("0");
+        Button jewellry = new Button("$500.00",jewellryImage);
+        Label jewellryLabel = new Label("Jewelry:   \nx"+jewellryNum.getText(),jewellry);
+        jewellry.setMinSize(150,80);
+        jewellryLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black");
+        jewellryImage.setFitHeight(70);
+        jewellryImage.setFitWidth(75);
+        
+        ImageView computerImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\computer.png")));
+        Label computerNum = new Label("0");
+        Button computer = new Button("$2000.00",computerImage);
+        Label computerLabel = new Label("Computer:\nx"+computerNum.getText(),computer);
+        computer.setMinSize(150, 80);
+        computerLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black");
+        computerImage.setFitHeight(70);
+        computerImage.setFitWidth(75);
+        
+        ImageView carImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\car.png")));
+        Label carNum = new Label("0");
+        Button car = new Button("$10000.00",carImage);
+        Label carLabel = new Label("Car:\nx"+carNum.getText(),car);
+        car.setMinSize(150,80);
+        carLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black");
+        carImage.setFitHeight(70);
+        carImage.setFitWidth(75);
+        
+        
+        itemsColumn1.getChildren().addAll(groceriesLabel,clothingLabel,toiletPaperLabel);
+        itemsColumn2.getChildren().addAll(jewellryLabel,computerLabel,carLabel);
+        itemsColumn1.setAlignment(Pos.CENTER);
+        itemsColumn2.setAlignment(Pos.CENTER);
+        
+       
+        //creating layout
+        VBox root = new VBox();
+        
+        //setting layout properties
+        root.getChildren().addAll(toolBar,itemsColumn1,itemsColumn2,purchaseBar);
+        root.setSpacing(80);
+        root.setAlignment(Pos.BASELINE_CENTER);
+        setCustomerBackground(root,backgroundImage);
+        VBox.setMargin(purchaseBar, new Insets(100,0,40,0));
+        VBox.setMargin(itemsColumn1,new Insets(0,0,0,30));
+        VBox.setMargin(itemsColumn2, new Insets(0,30,0,0));
+        
+        //Formatter for sum of purchases
+        NumberFormat formatter = new DecimalFormat("#.00");
+        
+        //creating action event handlers
+        logoutButton.setOnAction(e -> {
+            requestLogout(loginPage,purchasePage);
+        });
+        exitButton.setOnAction(e -> {
+            try {
+                customerPage(loginPage);
+                purchasePage.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        //the following expressions are more complex than they need to be because
+        //lambda expressions don't allow referencing to local variables
+        groceries.setOnAction(e -> {
+            int x = Integer.parseInt(groceriesNum.getText());
+            x++;
+            groceriesNum.setText(""+x);
+            groceriesLabel.setText("Groceries:\nx"+groceriesNum.getText());
+            
+            double newAmount = 35.00 + Double.parseDouble(purchaseTF.getText());
+            
+            purchaseTF.setText(formatter.format(newAmount));
+        });
+        clothing.setOnAction(e -> {
+            int x = Integer.parseInt(clothingNum.getText());
+            x++;
+            clothingNum.setText(""+x);
+            clothingLabel.setText("Clothes:   \nx"+clothingNum.getText());
+            
+            double newAmount = 75.00 + Double.parseDouble(purchaseTF.getText());
+            
+            purchaseTF.setText(formatter.format(newAmount));
+        });
+        toiletPaper.setOnAction(e -> {
+            int x = Integer.parseInt(toiletPaperNum.getText());
+            x++;
+            toiletPaperNum.setText(""+x);
+            toiletPaperLabel.setText("Toilet Paper:\nx"+toiletPaperNum.getText());
+            
+            double newAmount = 100.00 + Double.parseDouble(purchaseTF.getText());
+            
+            purchaseTF.setText(formatter.format(newAmount));
+        });
+        jewellry.setOnAction(e -> {
+            int x = Integer.parseInt(jewellryNum.getText());
+            x++;
+            jewellryNum.setText(""+x);
+            jewellryLabel.setText(("Jewelry:   \nx"+jewellryNum.getText()));
+            
+            double newAmount = 500.00 + Double.parseDouble(purchaseTF.getText());
+            
+            purchaseTF.setText(formatter.format(newAmount));
+        });
+        computer.setOnAction(e -> {
+            int x = Integer.parseInt(computerNum.getText());
+            x++;
+            computerNum.setText(""+x);
+            computerLabel.setText(("Computer:\nx"+computerNum.getText()));
+            
+            double newAmount = 2000.00 + Double.parseDouble(purchaseTF.getText());
+            
+            purchaseTF.setText(formatter.format(newAmount));
+        });
+        car.setOnAction(e -> {
+            int x = Integer.parseInt(carNum.getText());
+            x++;
+            carNum.setText(""+x);
+            carLabel.setText(("Car:\nx"+carNum.getText()));
+            
+            double newAmount = 10000.00 + Double.parseDouble(purchaseTF.getText());
+            
+            purchaseTF.setText(formatter.format(newAmount));
+        });
+        clearButton.setOnAction(e -> {
+            groceriesNum.setText("0");
+            clothingNum.setText("0");
+            toiletPaperNum.setText("0");
+            jewellryNum.setText("0");
+            computerNum.setText("0");
+            carNum.setText("0");
+            
+            groceriesLabel.setText("Groceries:\nx"+groceriesNum.getText());
+            clothingLabel.setText("Clothes:   \nx"+clothingNum.getText());
+            toiletPaperLabel.setText("Toilet Paper:\nx"+toiletPaperNum.getText());
+            jewellryLabel.setText(("Jewelry:   \nx"+jewellryNum.getText()));
+            computerLabel.setText(("Computer:\nx"+computerNum.getText()));
+            carLabel.setText(("Car:\nx"+carNum.getText()));
+            
+            purchaseTF.setText("0.00");
+        });
+        purchaseButton.setOnAction(e -> {
+            if(requestPurchase(this,purchaseTF.getText(),loginPage,purchasePage)) {
+                groceriesNum.setText("0");
+                clothingNum.setText("0");
+                toiletPaperNum.setText("0");
+                jewellryNum.setText("0");
+                computerNum.setText("0");
+                carNum.setText("0");
+
+                groceriesLabel.setText("Groceries:\nx"+groceriesNum.getText());
+                clothingLabel.setText("Clothes:   \nx"+clothingNum.getText());
+                toiletPaperLabel.setText("Toilet Paper:\nx"+toiletPaperNum.getText());
+                jewellryLabel.setText(("Jewelry:   \nx"+jewellryNum.getText()));
+                computerLabel.setText(("Computer:\nx"+computerNum.getText()));
+                carLabel.setText(("Car:\nx"+carNum.getText()));
+                purchaseTF.setText("0.00");
+            }else {
+                
+            }
+        });
+        
+        
+        
+        //creating scene
+        Scene scene = new Scene(root);
+        scene.setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ENTER) {
+                
+            }
+        });
+        
+        //setting stage properties
+        purchasePage.setTitle("Bank Account");
+        purchasePage.setWidth(1024);
+        purchasePage.setHeight(683);
+        purchasePage.setScene(scene);
+        purchasePage.setResizable(false);
+        purchasePage.show();
     }
     
     //authenticates the user credentials
@@ -911,7 +1187,7 @@ public class Client extends Application {
             if(role.equals("customer")) 
                 Customer.getInstance().handleLogin(this, username, password);
             
-        }catch(Exception e) {   //concrete class will throw an exception when credentials are incorrect
+        }catch(IncorrectLoginAttemptException e) {   //concrete class will throw an exception when credentials are incorrect
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error!");
@@ -919,6 +1195,12 @@ public class Client extends Application {
             alert.showAndWait();
             
             user = null;
+        } catch (UndefinedInputException ex) {
+            Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error!");
+                alert.setContentText("You left the username or password field blank.\n");
+                alert.showAndWait();
         }
         
         //moves to the corresponding page depending on user state
@@ -969,12 +1251,18 @@ public class Client extends Application {
             alert.setHeaderText("Congratulations!");
             alert.setContentText("A new customer has been created.");
             alert.showAndWait();
-        }catch (Exception x) {
+        }catch (SameUsernameException x) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error!");
-            alert.setContentText("Either there is an account associated with this username or the username/password field is empty.");
+            alert.setContentText("Either there is an account associated with this username");
             alert.showAndWait();
+        }catch (UndefinedInputException ex) {
+            Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error!");
+                alert.setContentText("You left the username or password field blank.\n");
+                alert.showAndWait();
         }             
     }
 
@@ -994,16 +1282,17 @@ public class Client extends Application {
     }
     
     //deposits an amount and changes level if threshold met
-    public void requestDeposit(Client c, String depositAmount, Stage loginPage, Stage currentStage) {
+    public void requestDeposit(Client c, String depositAmount, Stage loginPage, Stage currentPage) {
         try {
             user.handleDeposit(c, depositAmount);
             if (user.isLevelChanged(c)) {
                 Alert alert = new Alert (AlertType.INFORMATION);
                 alert.setTitle("CONFIRMATION");
-                alert.setHeaderText("Congratulations!\nYou have sucessfully deposited and you have met the threshold to change levels.");
-                alert.setContentText("You will be promptly logged out to set your account to the according level.\nPlease log back in to check it out!");
+                alert.setHeaderText("You have successfully deposited.");
+                alert.setContentText("Congratulations!\nYou also reached the threshold for a different level!");
                 alert.showAndWait();
-                requestLogout(loginPage,currentStage);
+                customerPage(loginPage);
+                currentPage.close();
             }else {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("CONFIRMATION");
@@ -1011,25 +1300,28 @@ public class Client extends Application {
                 alert.setContentText("You have sucessfully deposited money into your account.");
                 alert.showAndWait();
             }
-        }catch (Exception e) {
+        }catch (UndefinedInputException e) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error!");
             alert.setContentText("Your deposit amount is not recognized.");
             alert.showAndWait();
+        }catch (FileNotFoundException ex) {
+            
         }
     }
     
-    public void requestWithdraw(Client c, String withdrawAmount, Stage loginPage, Stage currentStage) {
+    public void requestWithdraw(Client c, String withdrawAmount, Stage loginPage, Stage currentPage) {
         try {
             user.handleWithdraw(c, withdrawAmount);
             if (user.isLevelChanged(c)) {
-                Alert alert = new Alert (AlertType.INFORMATION);
+               Alert alert = new Alert (AlertType.INFORMATION);
                 alert.setTitle("CONFIRMATION");
-                alert.setHeaderText("We're sorry!\n"+"You have sucessfully withdrew and you have met the threshold to change levels.");
-                alert.setContentText("You will be promptly logged out to set your account to the according level.\nPlease log back in to check it out!");
+                alert.setHeaderText("You have successfully withdrew.");
+                alert.setContentText("Were Sorry!\nYou also reached the threshold for a different level!");
                 alert.showAndWait();
-                requestLogout(loginPage,currentStage);
+                customerPage(loginPage);
+                currentPage.close();
             }else {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("CONFIRMATION");
@@ -1037,34 +1329,94 @@ public class Client extends Application {
                 alert.setContentText("You have sucessfully withdrew money from your account.");
                 alert.showAndWait();
             }
-        }catch (Exception e) {
+        }catch (UndefinedInputException e) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error!");
-            alert.setContentText("You do not have enough funds to withdraw the amount or the withdraw amount is unrecognized.");
+            alert.setContentText("The withdraw amount is unrecognized.");
             alert.showAndWait();
+        }catch (InsufficientFundsException ex) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error!");
+            alert.setContentText("You do not have enough funds to withdraw the amount.");
+            alert.showAndWait();
+        }catch (FileNotFoundException exs) {
+            
+        }
+    }
+    
+    public boolean requestPurchase(Client c, String purchaseAmount, Stage loginPage, Stage currentPage) {
+        Alert topAlert = new Alert(AlertType.CONFIRMATION);
+        topAlert.setTitle("Confirmation");
+        topAlert.setHeaderText("Are you sure you want to purchase?");
+        topAlert.setContentText(c.getUser().getTotalPurchase(c, purchaseAmount));
+            
+        Optional<ButtonType> result = topAlert.showAndWait();
+        if(result.get() == ButtonType.OK) {
+            try {
+                user.handlePurchase(c, purchaseAmount);
+                if (user.isLevelChanged(c)) {
+                    Alert alert = new Alert (AlertType.INFORMATION);
+                    alert.setTitle("CONFIRMATION");
+                    alert.setHeaderText("You have successfully purchased the items.");
+                    alert.setContentText("We're sorry!\nYou also reached the threshold for a different level!");
+                    alert.showAndWait();
+                    customerPage(loginPage);
+                    currentPage.close();
+                }else {
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("CONFIRMATION");
+                    alert.setHeaderText("Congratulations!");
+                    alert.setContentText("You have sucessfully purchased these items.");
+                    alert.showAndWait();
+                }
+            }catch (InsufficientFundsException e) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error!");
+                alert.setContentText("You do not have enough funds to purchase the amount.");
+                alert.showAndWait();
+                return false;
+            } catch (LimitNotReachedException ex) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error!");
+                alert.setContentText("You must purchase $50.00 or more.");
+                alert.showAndWait();
+                return false;
+            } catch (FileNotFoundException exs) {
+                
+            }
+            return true;
+        }else {
+            return false;
         }
     }
     
     //sets the background according to level of user
-    public void setCustomerBackground(VBox root, BackgroundImage backgroundImage) throws FileNotFoundException{
-        Image silverImage = new Image(new FileInputStream("src\\project\\Images\\silver.jpg"));
-        Image goldImage = new Image(new FileInputStream("src\\project\\Images\\gold.jpg")); 
-        Image platinumImage = new Image(new FileInputStream("src\\project\\Images\\platinum.jpg")); 
-        
-          switch (user.getLevel()) {
-            case "Silver":
-                backgroundImage = new BackgroundImage(silverImage,null,null,BackgroundPosition.CENTER,null);
-                root.setBackground(new Background(backgroundImage));
-                break;
-            case "Gold":
-                backgroundImage = new BackgroundImage(goldImage,null,null,BackgroundPosition.CENTER,null);
-                root.setBackground(new Background(backgroundImage));
-                break;
-            case "Platinum":
-                backgroundImage = new BackgroundImage(platinumImage,null,null,BackgroundPosition.CENTER,null);
-                root.setBackground(new Background(backgroundImage));
-                break;
+    public void setCustomerBackground(VBox root, BackgroundImage backgroundImage){
+        try {
+            Image silverImage = new Image(new FileInputStream("src\\project\\Images\\silver.jpg"));
+            Image goldImage = new Image(new FileInputStream("src\\project\\Images\\gold.jpg")); 
+            Image platinumImage = new Image(new FileInputStream("src\\project\\Images\\platinum.jpg")); 
+
+              switch (user.getLevel()) {
+                case "Silver":
+                    backgroundImage = new BackgroundImage(silverImage,null,null,BackgroundPosition.CENTER,null);
+                    root.setBackground(new Background(backgroundImage));
+                    break;
+                case "Gold":
+                    backgroundImage = new BackgroundImage(goldImage,null,null,BackgroundPosition.CENTER,null);
+                    root.setBackground(new Background(backgroundImage));
+                    break;
+                case "Platinum":
+                    backgroundImage = new BackgroundImage(platinumImage,null,null,BackgroundPosition.CENTER,null);
+                    root.setBackground(new Background(backgroundImage));
+                    break;
+            }
+        } catch (FileNotFoundException e) {
+            
         }
     }
     

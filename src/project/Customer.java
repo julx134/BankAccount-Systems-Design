@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static project.Manager.getInstance;
+import project.Exceptions.*;
 
 /**
  *
@@ -37,48 +38,47 @@ public class Customer extends Users{
     }
 
     @Override
-    public void handleLogin(Client c, String username, String password) throws Exception{
-        boolean usernameCheck = false, passwordCheck = false;
-         
-        try {
-            
+    public void handleLogin(Client c, String username, String password) throws UndefinedInputException,IncorrectLoginAttemptException{
+        checkInput(username,password);
+        
+        boolean usernameCheck = false, passwordCheck = false; 
+        try {      
            credentials = new File("src\\project\\CustomerInformation\\"+username+".txt");
-  
+
             Scanner input = new Scanner(credentials);
             while (input.hasNextLine()) {
                 String data = input.nextLine();
-                
+
                 if(data.equals(username))
                     usernameCheck = true;
-                
+
                 if(data.equals(password))
                     passwordCheck = true;
-                
+
                 if(data.equals("Silver"))
                     level = "Silver";
-                
+
                 if(data.equals("Gold"))
                     level = "Gold";
-                
+
                 if(data.equals("Platinum"))
-                    level = "Platinum";
-                    
+                    level = "Platinum";            
             }
             input.close();
         } catch (FileNotFoundException e) {
-            throw new Exception();
+            ;
         }
-        
+
         if (usernameCheck && passwordCheck) {
             for(Users customer : c.getCustomers()) {
                 if (customer.getUsername().equals(username))    
                     c.setUser(c.getCustomers().get(c.getCustomers().indexOf(customer)));
             }
         }else {
-            throw new Exception();
-        }   
+            throw new IncorrectLoginAttemptException();
+        }
     }
-    
+        
     
     @Override
     public void handleLogout(Client c) {
@@ -174,8 +174,10 @@ public class Customer extends Users{
         return true;
     }
     
+    
+    
     @Override
-    public void handleDeposit(Client c, String depositAmount) throws Exception {
+    public void handleDeposit(Client c, String depositAmount) throws UndefinedInputException{
        
         if (validateInput(depositAmount)) {
             
@@ -197,13 +199,14 @@ public class Customer extends Users{
             replaceFileContent(c,oldAmountString, newAmountString);
             
         }else {
-            throw new Exception();
+            throw new UndefinedInputException();
         }
     }
     
     @Override
-    public void handleWithdraw(Client c, String withdrawAmount) throws Exception {
-       
+    public void handleWithdraw(Client c, String withdrawAmount) throws UndefinedInputException,InsufficientFundsException{
+        checkInput(withdrawAmount);
+        
         if (validateInput(withdrawAmount)) {
             
             //formats string input so it can be parsed as double
@@ -221,10 +224,61 @@ public class Customer extends Users{
                 //write new amount to file
                 replaceFileContent(c,oldAmountString, newAmountString);
             }else {
-                throw new Exception();
+                throw new InsufficientFundsException();
             }
         }else {
-            throw new Exception();
+            throw new UndefinedInputException();
         }
     }
+    
+    @Override
+    public void handlePurchase(Client c, String purchaseAmount) throws InsufficientFundsException,LimitNotReachedException {
+        //formats string input so it can be parsed as double
+        NumberFormat formatter = new DecimalFormat("#.00");
+        String formattedPurchaseString = purchaseAmount.replaceAll("\\$", "");
+        formattedPurchaseString = formattedPurchaseString.replaceAll("\\,", "");
+
+        double purchaseAmountNum = Double.parseDouble(formattedPurchaseString);
+        
+        try {
+            if(purchaseAmountNum <= 50.00)
+                throw new InsufficientFundsException();
+                
+            switch (c.getUser().getLevel()) {
+                case "Silver": 
+                    handleWithdraw(c,formatter.format(purchaseAmountNum+20.0));
+                    break;
+                case "Gold":
+                    handleWithdraw(c,formatter.format(purchaseAmountNum+10.0));
+                    break;
+                case "Platinum":
+                    handleWithdraw(c,formatter.format(purchaseAmountNum));
+                    break;
+            }
+        }catch (UndefinedInputException e) {
+            ;
+        }
+    }
+    
+    @Override
+    public String getTotalPurchase(Client c, String initialAmount) {
+        NumberFormat formatter = new DecimalFormat(",###,###.00");
+        String finalAmount;
+        String returnAmount="";
+        switch (c.getUser().getLevel()) {
+            case "Silver":
+                finalAmount = formatter.format(Double.parseDouble(initialAmount)+20.00);
+                returnAmount = ("Silver level tax: $20.00\n=$"+initialAmount+" + $20.00\n=$"+finalAmount);
+                break;
+            case "Gold":
+                finalAmount = formatter.format(Double.parseDouble(initialAmount)+10.00);
+                returnAmount = ("Gold level tax: $10.00\n=$"+initialAmount+" + $10.00\n=$"+finalAmount);
+                break;
+            case "Platinum":
+                returnAmount = ("Platinum level tax: $0.00\n=$"+initialAmount+" + $0.00\n=$"+initialAmount);
+                break;
+        }
+        return returnAmount;
+    }
+    
 }

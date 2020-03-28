@@ -6,6 +6,10 @@
 package project;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import project.Exceptions.*;
 
 /**
  *
@@ -33,10 +37,13 @@ public class Manager extends Users{
     }
         
     @Override
-    public void handleAddCustomer(Client c, String username, String password) throws Exception {    
-        if(!(username.equals("")) && !(password.equals(""))) {
-            File newCustomerFile = new File("src\\project\\CustomerInformation\\"+username+".txt");  
-            
+    public void handleAddCustomer(Client c, String username, String password) throws UndefinedInputException,SameUsernameException {    
+        checkInput(username,password);
+        
+        File newCustomerFile = new File("src\\project\\CustomerInformation\\"+username+".txt");  
+
+        try {
+
             if (newCustomerFile.createNewFile()){
                 FileWriter writeFile = new FileWriter(newCustomerFile);
                 writeFile.write("Username:\n"+username+"\n");
@@ -46,15 +53,17 @@ public class Manager extends Users{
                 writeFile.write("Role:\nCustomer");
                 writeFile.close();
             }else {
-                throw new Exception();
+                throw new SameUsernameException();
             }
-            
-            //creates a new SilverCustomer and adds it to array list of customers
-            c.getCustomers().add(new Customer(username,password,"customer","Silver",new BankAccount(),newCustomerFile));
-        }else {
-            throw new Exception();
-        }     
-    }
+
+        } catch (IOException ex) {
+            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //creates a new SilverCustomer and adds it to array list of customers
+        c.getCustomers().add(new Customer(username,password,"customer","Silver",new BankAccount(),newCustomerFile));
+    }   
+    
     
     @Override
     public void handleDeleteCustomer(Client c,int i) {
@@ -63,12 +72,13 @@ public class Manager extends Users{
     }
    
     @Override
-    public void handleLogin(Client c, String username, String password) throws Exception{
-         
+    public void handleLogin(Client c, String username, String password) throws UndefinedInputException,IncorrectLoginAttemptException{
+        checkInput(username,password);
+        
         if(username.equals("admin") && password.equals("admin"))
             c.setUser(getInstance());
         else
-            throw new Exception();
+            throw new IncorrectLoginAttemptException();
     }
     
     @Override
