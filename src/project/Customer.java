@@ -16,7 +16,6 @@ import java.text.NumberFormat;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static project.Manager.getInstance;
 import project.Exceptions.*;
 
 /**
@@ -36,15 +35,20 @@ public class Customer extends Users{
             instance = new Customer("","","","",null,null);
         return instance;
     }
-
+    
+    /*
+    *The following methods are the implementation of the handle methods and customer-specific methods
+    */
     @Override
     public void handleLogin(Client c, String username, String password) throws UndefinedInputException,IncorrectLoginAttemptException{
+        //checks if the input is not null and throws an UndefinedInputException otherwise
         checkInput(username,password);
         
+        //boolean  to check if password and username are correct
         boolean usernameCheck = false, passwordCheck = false; 
-        try {      
-           credentials = new File("src\\project\\CustomerInformation\\"+username+".txt");
-
+        try {    
+            //reads from corrosponding file
+            credentials = new File("src\\project\\CustomerInformation\\"+username+".txt");
             Scanner input = new Scanner(credentials);
             while (input.hasNextLine()) {
                 String data = input.nextLine();
@@ -68,7 +72,10 @@ public class Customer extends Users{
         } catch (FileNotFoundException e) {
             ;
         }
-
+        
+        //if the username and password are correct loop through the arrayList of customers
+        //checks to see which customer username matches the file and sets that customer as the user
+        //otherwise throw IncorrectLoginAttemptException
         if (usernameCheck && passwordCheck) {
             for(Users customer : c.getCustomers()) {
                 if (customer.getUsername().equals(username))    
@@ -79,102 +86,11 @@ public class Customer extends Users{
         }
     }
         
-    
     @Override
     public void handleLogout(Client c) {
+        //sets the user to null
         c.setUser(null);
-    }    
-    
-    @Override
-    public boolean isLevelChanged(Client c) {
-        String level = c.getUser().getLevel();
-        double userFunds = c.getUser().bankAccount.getFunds();
-        
-        switch (level) {
-            case "Silver":
-                if( userFunds >= 10000.00 && userFunds < 20000.00) {
-                    this.level = "Gold";
-                    replaceFileContent(c,"Silver","Gold");
-                    return true;
-                }else if(userFunds >= 20000.00) {
-                    this.level = "Platinum";
-                    replaceFileContent(c,"Silver","Platinum");
-                    return true;
-                }
-                break;
-            
-            case "Gold":
-                if(userFunds >= 20000.00) {
-                    this.level = "Platinum";
-                    replaceFileContent(c,"Gold","Platinum");
-                    return true;
-                }else if(userFunds < 10000.00) {
-                    this.level = "Silver";
-                    replaceFileContent(c,"Gold","Silver");
-                    return true;
-                }
-                break;
-                
-            case "Platinum":
-                if(userFunds >= 10000.00 && userFunds < 20000.00) {
-                    this.level = "Gold";
-                    replaceFileContent(c,"Platinum","Gold");
-                    return true;
-                }else if (userFunds < 10000.00) {
-                    this.level = "Silver";
-                    replaceFileContent(c,"Gold","Silver");
-                    return true;
-                }                    
-        }    
-        return false;
-    }
-    
-    
-    private String getFileContent(Client c) {
-        String oldContent ="";
-        BufferedReader reader = null;
-        
-        try {
-            //reads all the content of the file
-            reader = new BufferedReader(new FileReader(c.getUser().getCredentials()));
-            String allContent = reader.readLine();
-            while(allContent != null) {
-                oldContent = oldContent+allContent+System.lineSeparator();
-                allContent = reader.readLine();     
-            }
-            reader.close();   
-        }catch (IOException e) {
-            //
-        }
-        return oldContent;
-    }
-    
-    private void replaceFileContent(Client c, String oldContent, String newContent) {
-        try {
-            FileWriter writer = null;
-            String newFileContent = getFileContent(c).replaceAll(oldContent, newContent);
-            writer = new FileWriter(c.getUser().getCredentials());
-            writer.write(newFileContent);
-            
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(Customer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }
-    
-    private boolean validateInput(String userInput) {
-        userInput = userInput.toLowerCase();
-        
-        for (int i = 0; i < userInput.length(); i++) {
-            if (Character.isLetter(userInput.charAt(i)))
-                return false;
-        }
-        
-        return true;
-    }
-    
-    
+    } 
     
     @Override
     public void handleDeposit(Client c, String depositAmount) throws UndefinedInputException{
@@ -237,12 +153,14 @@ public class Customer extends Users{
         NumberFormat formatter = new DecimalFormat("#.00");
         String formattedPurchaseString = purchaseAmount.replaceAll("\\$", "");
         formattedPurchaseString = formattedPurchaseString.replaceAll("\\,", "");
-
-        double purchaseAmountNum = Double.parseDouble(formattedPurchaseString);
         
+        //if the purchaseAmount is less than 50 then throw LimitNotReachedException
+        //otherwise add the tax to purchaseAmount corresponding to customer level 
+        //since purchase and withdraw have the same logic, call handleWithdraw
+        double purchaseAmountNum = Double.parseDouble(formattedPurchaseString);
         try {
-            if(purchaseAmountNum <= 50.00)
-                throw new InsufficientFundsException();
+            if(purchaseAmountNum < 50.00)
+                throw new LimitNotReachedException();
                 
             switch (c.getUser().getLevel()) {
                 case "Silver": 
@@ -258,6 +176,57 @@ public class Customer extends Users{
         }catch (UndefinedInputException e) {
             ;
         }
+    }
+    
+    @Override
+    public String toString() {
+        NumberFormat formatter = new DecimalFormat("$#,###,###.00");
+        return ("Username: "+username+"\t\t"+"Password: "+password+"\t\t"+"Funds: "+ formatter.format(bankAccount.getFunds())+"\t\t"+"Level: "+level);
+    }
+    
+    @Override
+    public boolean isLevelChanged(Client c) {
+        double userFunds = c.getUser().bankAccount.getFunds();
+        
+        //change the level of user and replace the corresponding file content
+        //returns true if there is a level change otherwise return false;
+        switch (c.getUser().getLevel()) {
+            case "Silver":
+                if( userFunds >= 10000.00 && userFunds < 20000.00) {
+                    this.level = "Gold";
+                    replaceFileContent(c,"Silver","Gold");
+                    return true;
+                }else if(userFunds >= 20000.00) {
+                    this.level = "Platinum";
+                    replaceFileContent(c,"Silver","Platinum");
+                    return true;
+                }
+                break;
+            
+            case "Gold":
+                if(userFunds >= 20000.00) {
+                    this.level = "Platinum";
+                    replaceFileContent(c,"Gold","Platinum");
+                    return true;
+                }else if(userFunds < 10000.00) {
+                    this.level = "Silver";
+                    replaceFileContent(c,"Gold","Silver");
+                    return true;
+                }
+                break;
+                
+            case "Platinum":
+                if(userFunds >= 10000.00 && userFunds < 20000.00) {
+                    this.level = "Gold";
+                    replaceFileContent(c,"Platinum","Gold");
+                    return true;
+                }else if (userFunds < 10000.00) {
+                    this.level = "Silver";
+                    replaceFileContent(c,"Gold","Silver");
+                    return true;
+                }                    
+        }    
+        return false;
     }
     
     @Override
@@ -281,4 +250,59 @@ public class Customer extends Users{
         return returnAmount;
     }
     
+    /*
+    *The following private mtehods are helper methods
+    */
+    //copies the file content to a string
+    private String getFileContent(Client c) {
+        String oldContent ="";
+        BufferedReader reader = null;
+        
+        try {
+            //reads all the content of the file
+            reader = new BufferedReader(new FileReader(c.getUser().getCredentials()));
+            String allContent = reader.readLine();
+            while(allContent != null) {
+                oldContent = oldContent+allContent+System.lineSeparator();
+                allContent = reader.readLine();     
+            }
+            reader.close();   
+        }catch (IOException e) {
+            //
+        }
+        return oldContent;
+    }
+    
+    //replaces content of the file with new content
+    private void replaceFileContent(Client c, String oldContent, String newContent) {
+        try {
+            FileWriter writer = null;
+            String newFileContent = getFileContent(c).replaceAll(oldContent, newContent);
+            writer = new FileWriter(c.getUser().getCredentials());
+            writer.write(newFileContent);
+            
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Customer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    //returns true if input is valid otherwise throw UndefinedInputException or return false
+    private boolean validateInput(String userInput) throws UndefinedInputException {
+        //checks if the input is not null and throws UndefinedInputException otherwise
+        checkInput(userInput);
+        
+        //checks to see if the input contains any illegal characters such as alphabets and negative
+        userInput = userInput.replaceAll("\\.","");
+        userInput = userInput.replaceAll("\\,", "");
+        userInput = userInput.replaceAll("\\$","");
+        System.out.println(userInput);
+        for (int i = 0; i < userInput.length(); i++) {
+            if (Character.isAlphabetic(userInput.charAt(i))||!(Character.isDigit(userInput.charAt(i))))
+                return false;
+        }     
+        return true;
+    }
+
 }

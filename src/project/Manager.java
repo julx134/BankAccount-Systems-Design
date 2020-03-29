@@ -35,15 +35,20 @@ public class Manager extends Users{
         //creates a new SilverCustomer and adds it to array list of customers
         c.getCustomers().add(new Customer(username,password,"customer",level,new BankAccount(Double.parseDouble(funds)),customerFile));
     }
-        
+    
+    /*
+    *The following methods are the implementation of the handle methods
+    */
     @Override
-    public void handleAddCustomer(Client c, String username, String password) throws UndefinedInputException,SameUsernameException {    
+    public void handleAddCustomer(Client c, String username, String password) throws UndefinedInputException,SameUsernameException {  
+        //checks if the input is not null and throws an UndefinedInputException otherwise
         checkInput(username,password);
-        
+        //creates the file
         File newCustomerFile = new File("src\\project\\CustomerInformation\\"+username+".txt");  
 
         try {
-
+            //if there is a file with the username then throw SameUsernameException
+            //otherwise write appropriate data to file
             if (newCustomerFile.createNewFile()){
                 FileWriter writeFile = new FileWriter(newCustomerFile);
                 writeFile.write("Username:\n"+username+"\n");
@@ -67,14 +72,19 @@ public class Manager extends Users{
     
     @Override
     public void handleDeleteCustomer(Client c,int i) {
+        //gets the indexOf the specific customer from the client
+        //deletes the customer from the arrayList and the associated file with it
         c.getCustomers().get(i).getCredentials().delete();
         c.getCustomers().remove(i);    
     }
    
     @Override
     public void handleLogin(Client c, String username, String password) throws UndefinedInputException,IncorrectLoginAttemptException{
+        //checks if the input is not null and throws an UndefinedInputException otherwise
         checkInput(username,password);
         
+        //checks if the username and password match the credentials
+        //otherwise throw IncorrectLoginAttemptException
         if(username.equals("admin") && password.equals("admin"))
             c.setUser(getInstance());
         else
@@ -83,6 +93,7 @@ public class Manager extends Users{
     
     @Override
     public void handleLogout(Client c) {
+        //sets the user to null
         c.setUser(null);
     }    
 }

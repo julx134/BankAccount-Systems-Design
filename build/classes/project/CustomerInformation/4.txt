@@ -1,3 +1,10 @@
+Username:
 4
+Password:
 4
-customer
+Funds:
+100.00
+Level:
+Silver
+Role:
+Customer

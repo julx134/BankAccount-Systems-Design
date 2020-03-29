@@ -9,7 +9,6 @@ import project.Exceptions.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -44,6 +43,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 /**
@@ -57,6 +57,7 @@ public class Client extends Application {
     private String username,password,role;
     
     @Override
+    //registers pre-existing customer files before the app starts
     public void init() throws Exception {
         boolean username = false, password = false, level = false,funds=false;
         String usernameString="", passwordString="", levelString="", fundsString="";
@@ -112,6 +113,9 @@ public class Client extends Application {
         }
     }
     
+    /*
+    *The following methods are for the pages corresponding to manager and customer users
+    */
     @Override
     public void start(Stage loginStage) throws FileNotFoundException { 
         
@@ -434,7 +438,10 @@ public class Client extends Application {
         imageV2.setFitHeight(15);
         imageV2.setFitWidth(15);  
         menuButton.setMinSize(330, 70);
-        menuButton.setStyle("-fx-font-size:25px");
+        menuButton.setStyle("-fx-font-size:15px");
+        menuButton.setPopupSide(Side.RIGHT);
+        menuButton.getItems().sorted();
+        menuButton.setTextAlignment(TextAlignment.RIGHT);
         deleteButton.setMinSize(120,50);
         deleteButton.setStyle("-fx-font-size:20px");
                
@@ -444,7 +451,7 @@ public class Client extends Application {
         
         //setting layout properties
         root.getChildren().addAll(toolBar,menuButton);
-        root.setSpacing(100);
+        root.setSpacing(50);
         root.setAlignment(Pos.BASELINE_CENTER);
         root.setBackground(new Background(background));
         
@@ -520,17 +527,21 @@ public class Client extends Application {
         Button depositButton = new Button("Deposit Money",depositImage);
         Button withdrawButton = new Button("Withdraw Money",withdrawImage);
         Button onlinePurchaseButton = new Button("Online Shopping",purchaseImage);        
-        ToolBar toolBar = new ToolBar(); 
+        ToolBar toolBar = new ToolBar();
+        Label usernameLabel = new Label("Username: "+user.getUsername());
         
         
         //setting node properties
-        toolBar.getItems().add(logoutButton);
+        toolBar.getItems().addAll(logoutButton,usernameLabel);
         toolBar.setStyle("-fx-background-color:transparent");
         toolBar.setNodeOrientation(NodeOrientation.INHERIT);
         logoutButton.setStyle("-fx-font-size:15px");
         logoutButton.setMinSize(40,20);
         logoutImage.setFitHeight(15);
         logoutImage.setFitWidth(15);
+        usernameLabel.setStyle("-fx-font-size:20px;"
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
         
         checkBalanceButton.setMinSize(230, 60);
         checkBalanceButton.setStyle("-fx-font-size:23px");
@@ -644,11 +655,13 @@ public class Client extends Application {
         imageV2.setFitWidth(15);
         
         balanceLabel.setStyle("-fx-background-color:F7F6F6;"
-                + "-fx-font-size:70px");
+                + "-fx-font-size:65px;"
+                + "-fx-font-weight:normal");
         balanceLabel.setTextFill(Color.GREEN);
         NumberFormat formatter = new DecimalFormat("#,###,###.00");
         balanceLabel.setText("  $"+formatter.format(user.getBankAccount().getFunds())+"  ");
-        headerLabel.setStyle("-fx-font-size:70px");
+        headerLabel.setStyle("-fx-font-size:50px;"
+                + "-fx-font-weight:bold");
         headerLabel.setTextFill(Color.BLACK);
         
         
@@ -968,9 +981,10 @@ public class Client extends Application {
         Label groceriesLabel = new Label("Groceries:\nx"+groceriesNum.getText(),groceries);
         groceries.setMinSize(150,80);
         groceriesLabel.setStyle("-fx-font-size:20px;"
-                + "-fx-text-fill:black");
-        groceriesImage.setFitHeight(70);
-        groceriesImage.setFitWidth(75);
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
+        groceriesImage.setFitHeight(60);
+        groceriesImage.setFitWidth(65);
         
         ImageView clothingImage = new ImageView(new Image(new FileInputStream("src\\project\\Images\\clothing.png")));
         Button clothing = new Button(" $75.00   ",clothingImage);
@@ -978,7 +992,8 @@ public class Client extends Application {
         Label clothingLabel = new Label("Clothes:   \nx"+clothingNum.getText(),clothing);
         clothing.setMinSize(150,80);
         clothingLabel.setStyle("-fx-font-size:20px;"
-                + "-fx-text-fill:black");
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
         clothingImage.setFitHeight(70);
         clothingImage.setFitWidth(75);
         
@@ -988,7 +1003,8 @@ public class Client extends Application {
         Label toiletPaperLabel = new Label("Toilet Paper:\nx"+toiletPaperNum.getText(),toiletPaper);
         toiletPaper.setMinSize(150,80);
         toiletPaperLabel.setStyle("-fx-font-size:20px;"
-                + "-fx-text-fill:black");
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
         toiletPaperImage.setFitHeight(70);
         toiletPaperImage.setFitWidth(75);
         
@@ -998,7 +1014,8 @@ public class Client extends Application {
         Label jewellryLabel = new Label("Jewelry:   \nx"+jewellryNum.getText(),jewellry);
         jewellry.setMinSize(150,80);
         jewellryLabel.setStyle("-fx-font-size:20px;"
-                + "-fx-text-fill:black");
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
         jewellryImage.setFitHeight(70);
         jewellryImage.setFitWidth(75);
         
@@ -1008,7 +1025,8 @@ public class Client extends Application {
         Label computerLabel = new Label("Computer:\nx"+computerNum.getText(),computer);
         computer.setMinSize(150, 80);
         computerLabel.setStyle("-fx-font-size:20px;"
-                + "-fx-text-fill:black");
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
         computerImage.setFitHeight(70);
         computerImage.setFitWidth(75);
         
@@ -1018,7 +1036,8 @@ public class Client extends Application {
         Label carLabel = new Label("Car:\nx"+carNum.getText(),car);
         car.setMinSize(150,80);
         carLabel.setStyle("-fx-font-size:20px;"
-                + "-fx-text-fill:black");
+                + "-fx-text-fill:black;"
+                + "-fx-font-weight:bold");
         carImage.setFitHeight(70);
         carImage.setFitWidth(75);
         
@@ -1038,7 +1057,7 @@ public class Client extends Application {
         root.setAlignment(Pos.BASELINE_CENTER);
         setCustomerBackground(root,backgroundImage);
         VBox.setMargin(purchaseBar, new Insets(100,0,40,0));
-        VBox.setMargin(itemsColumn1,new Insets(0,0,0,30));
+        VBox.setMargin(itemsColumn1,new Insets(0,0,0,43));
         VBox.setMargin(itemsColumn2, new Insets(0,30,0,0));
         
         //Formatter for sum of purchases
@@ -1176,18 +1195,25 @@ public class Client extends Application {
         purchasePage.show();
     }
     
-    //authenticates the user credentials
+    /*
+    *The following request methods call the specific handle methods of the concrete sub-classes
+    *The concrete sub-classes will handle the logic while the methods will handle the flow of the GUI
+    *conrete sub-class will throw an exception depending on the input passed
+    */
+    //authenticates the user login credentials
     public void requestLogin (Stage loginPage,String username, String password, String role)  {
         
-        //try-catch clause where the state change is handled by the login method of the concrete class
+        //try-catch clause where the state change is handled by the login method of the concrete sub-class
         try {
+            //the handle method will set the user
+            //the dummy static method is only to check which sub-class method it is calling
             if(role.equals("manager"))
                 Manager.getInstance().handleLogin(this,username,password);
             
             if(role.equals("customer")) 
                 Customer.getInstance().handleLogin(this, username, password);
             
-        }catch(IncorrectLoginAttemptException e) {   //concrete class will throw an exception when credentials are incorrect
+        }catch(IncorrectLoginAttemptException e) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error!");
@@ -1229,7 +1255,7 @@ public class Client extends Application {
         }
     }
     
-    //sets the user state to null
+    //sets the user state to null and redirect user to loginPage
     public void requestLogout(Stage loginPage, Stage currentStage) {
         try {
             user.handleLogout(this); 
@@ -1241,7 +1267,7 @@ public class Client extends Application {
         
     }
     
-    //adds the customer to customer arraylist
+    //adds the customer to customer arraylist and corresponding file to folder
     public void requestAddCustomer(String username, String password){
         try {
             user.handleAddCustomer(this,username,password);
@@ -1266,7 +1292,7 @@ public class Client extends Application {
         }             
     }
 
-    //deletes the file and corresponding menuItem
+    //deletes the customer selected and the corresponding file
     public boolean requestDeleteCustomer(int i) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
@@ -1281,7 +1307,7 @@ public class Client extends Application {
         }
     }
     
-    //deposits an amount and changes level if threshold met
+    //deposits an amount and changes level if threshold is met
     public void requestDeposit(Client c, String depositAmount, Stage loginPage, Stage currentPage) {
         try {
             user.handleDeposit(c, depositAmount);
@@ -1311,6 +1337,7 @@ public class Client extends Application {
         }
     }
     
+    //withdraws an amount and changes level if threshold is met
     public void requestWithdraw(Client c, String withdrawAmount, Stage loginPage, Stage currentPage) {
         try {
             user.handleWithdraw(c, withdrawAmount);
@@ -1346,6 +1373,7 @@ public class Client extends Application {
         }
     }
     
+    //similar to withdraw method but with tax on appropriate level
     public boolean requestPurchase(Client c, String purchaseAmount, Stage loginPage, Stage currentPage) {
         Alert topAlert = new Alert(AlertType.CONFIRMATION);
         topAlert.setTitle("Confirmation");
@@ -1394,7 +1422,7 @@ public class Client extends Application {
         }
     }
     
-    //sets the background according to level of user
+    //sets the background according to the level of user
     public void setCustomerBackground(VBox root, BackgroundImage backgroundImage){
         try {
             Image silverImage = new Image(new FileInputStream("src\\project\\Images\\silver.jpg"));

@@ -18,7 +18,7 @@ public abstract class Users {
     protected BankAccount bankAccount;
     protected File credentials;
     
-    //constructor implementation for super in subclass
+    //constructor implementation for manager user type
     public Users (String username, String password, String role) {
         this.username = username;
         this.password = password;
@@ -34,13 +34,10 @@ public abstract class Users {
         this.level = level;
         credentials = customerFile;
     }
-    
-    @Override
-    public String toString() {
-        return ("Username: "+username+"\t\t"+"Password: "+password+"\t\t"+"Level: "+level); 
-    }
-    
-    //normal methods to be used by both types of sub-classes
+     
+    /*
+    *normal methods to be used by both types of sub-classes
+    */
     protected BankAccount getBankAccount() {
         return bankAccount;
     }
@@ -53,7 +50,6 @@ public abstract class Users {
     protected File getCredentials() {
         return credentials;
     }
-    
     protected void checkInput(String ...input) throws UndefinedInputException{
         for(String checkString : input) {
             if(checkString.equals(""))
@@ -61,7 +57,7 @@ public abstract class Users {
         }
     }
     
-    //abstract methods to be implemented by concrete sub-classes
+    //abstract methods to be implemented by both of the concrete sub-classes
     protected abstract void handleLogin(Client c,String username,String password) throws UndefinedInputException,IncorrectLoginAttemptException;
     protected abstract void handleLogout(Client c);  
     
@@ -70,9 +66,15 @@ public abstract class Users {
     protected void handleDeleteCustomer(Client c, int i) {}
         
     //normal methods to be overriden by customer sub-class
+    @Override
+    public String toString() {
+        return (""); 
+    }
     protected void handleDeposit (Client c, String depositAmount) throws UndefinedInputException{}
     protected void handleWithdraw (Client c, String withdrawAmount) throws UndefinedInputException,InsufficientFundsException {}
     protected void handlePurchase (Client c, String purchaseAmount) throws InsufficientFundsException,LimitNotReachedException {}
     protected String getTotalPurchase(Client c, String initialAmount){return null;}
     protected boolean isLevelChanged (Client c) {return false;}
+    
+    
 }
