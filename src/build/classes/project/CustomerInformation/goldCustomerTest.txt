@@ -1,0 +1,10 @@
+Username:
+goldCustomerTest
+Password:
+123
+Funds:
+18103.50
+Level:
+Gold
+Role:
+Customer

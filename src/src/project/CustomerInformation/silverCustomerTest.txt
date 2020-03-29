@@ -1,0 +1,10 @@
+Username:
+silverCustomerTest
+Password:
+123
+Funds:
+1639.23
+Level:
+Silver
+Role:
+Customer
