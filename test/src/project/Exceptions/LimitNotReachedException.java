@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package project;
+package project.Exceptions;
 
 /**
  *
  * @author Jules
  */
-public class GoldCustomer {
-    
+public class LimitNotReachedException extends Exception{
+    public LimitNotReachedException() {
+        super();
+    }
 }

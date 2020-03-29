@@ -1,0 +1,10 @@
+Username:
+platCustomerTest
+Password:
+123
+Funds:
+20450.59
+Level:
+Platinum
+Role:
+Customer
